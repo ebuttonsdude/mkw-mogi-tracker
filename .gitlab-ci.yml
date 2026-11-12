@@ -1,0 +1,64 @@
+stages:
+  - prepare
+  - verify
+  - deploy
+
+# Watson uses a shell executor. The wrapper explicitly runs Docker, not host installs.
+default:
+  tags:
+    - docker
+    - arch
+  timeout: 30 minutes
+
+toolchain:
+  stage: prepare
+  script:
+    - bash tools/ci_image.sh prepare > ci-toolchain.env
+  artifacts:
+    expire_in: 1 day
+    reports:
+      dotenv: ci-toolchain.env
+
+checks:
+  stage: verify
+  needs:
+    - job: toolchain
+      artifacts: true
+  script:
+    - bash tools/run_ci.sh checks
+  artifacts:
+    # Publish only archives that passed inspection and the isolated installation smoke test.
+    when: on_success
+    expire_in: 1 week
+    paths:
+      - dist/mkw_mogi_tracker-*.whl
+      - dist/mkw_mogi_tracker-*.tar.gz
+
+browser:
+  stage: verify
+  needs:
+    - job: toolchain
+      artifacts: true
+  script:
+    - bash tools/run_ci.sh browser
+
+# Public and private repositories may publish. GitLab's separate Pages access
+# setting controls the audience; this job does not change access settings.
+pages:
+  stage: deploy
+  needs:
+    - job: toolchain
+      artifacts: true
+    - job: checks
+      artifacts: false
+    - job: browser
+      artifacts: false
+  script:
+    - bash tools/run_docs_ci.sh
+  pages:
+    publish: public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

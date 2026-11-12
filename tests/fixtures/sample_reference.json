@@ -1,0 +1,159 @@
+{
+  "kind": "manual visual reference, not OCR output",
+  "source": "video-samples/3-sequences-from-mogi-2v2.mp4",
+  "points_by_position": [
+    15,
+    12,
+    10,
+    9,
+    8,
+    7,
+    6,
+    5,
+    4,
+    3,
+    2,
+    1
+  ],
+  "players": [
+    {
+      "id": "p01",
+      "first_race_position": 1,
+      "display_name_hint": "DxDMilkies",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p02",
+      "first_race_position": 2,
+      "display_name_hint": "uwu rawr",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p03",
+      "first_race_position": 3,
+      "display_name_hint": "ST Jirachi",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p04",
+      "first_race_position": 4,
+      "display_name_hint": "z17chopper",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p05",
+      "first_race_position": 5,
+      "display_name_hint": "MiSt Doent",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p06",
+      "first_race_position": 6,
+      "display_name_hint": "MiSt Zeke",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p07",
+      "first_race_position": 7,
+      "display_name_hint": "zRiasEve",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p08",
+      "first_race_position": 8,
+      "display_name_hint": "Japanese name with dc and star",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p09",
+      "first_race_position": 9,
+      "display_name_hint": "highlighted ST avid name",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p10",
+      "first_race_position": 10,
+      "display_name_hint": "Japanese name with diamond",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p11",
+      "first_race_position": 11,
+      "display_name_hint": "DxD Nyx098",
+      "exact_unicode_verified": false
+    },
+    {
+      "id": "p12",
+      "first_race_position": 12,
+      "display_name_hint": "uwu meow",
+      "exact_unicode_verified": false
+    }
+  ],
+  "races": [
+    {
+      "id": "sample-race-1",
+      "evidence": ".omx/evidence/frame-098.png",
+      "finishing_order": [
+        "p01",
+        "p02",
+        "p03",
+        "p04",
+        "p05",
+        "p06",
+        "p07",
+        "p08",
+        "p09",
+        "p10",
+        "p11",
+        "p12"
+      ]
+    },
+    {
+      "id": "sample-race-2",
+      "evidence": ".omx/evidence/frame-214.png",
+      "finishing_order": [
+        "p05",
+        "p08",
+        "p12",
+        "p03",
+        "p04",
+        "p07",
+        "p10",
+        "p02",
+        "p06",
+        "p01",
+        "p11",
+        "p09"
+      ]
+    }
+  ],
+  "expected_totals": {
+    "p01": 18,
+    "p02": 17,
+    "p03": 19,
+    "p04": 17,
+    "p05": 23,
+    "p06": 11,
+    "p07": 13,
+    "p08": 17,
+    "p09": 5,
+    "p10": 9,
+    "p11": 4,
+    "p12": 11
+  },
+  "third_race": "intro present, result absent; do not score",
+  "coarse_intro_brackets_seconds": [
+    [
+      54,
+      56
+    ],
+    [
+      178,
+      180
+    ],
+    [
+      284,
+      286
+    ]
+  ]
+}

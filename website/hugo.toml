@@ -1,0 +1,83 @@
+baseURL = 'https://example.invalid/'
+title = 'MKW Mogi Tracker'
+languageCode = 'en'
+theme = 'hextra'
+enableRobotsTXT = true
+disableKinds = ['taxonomy', 'term', 'RSS']
+
+# Preserve upstream copyright/license banners in bundled CSS and JavaScript.
+# Hextra and FlexSearch already ship compiled assets; HTML may still be minified.
+[minify]
+  disableCSS = true
+  disableJS = true
+
+[cascade]
+  type = 'docs'
+  [cascade.params]
+    noindex = true
+
+[markup.goldmark.renderer]
+  unsafe = true
+[markup.highlight]
+  noClasses = false
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 3
+
+[[menu.main]]
+  name = 'Start here'
+  pageRef = '/'
+  weight = 1
+[[menu.main]]
+  name = 'Website theme'
+  weight = 2
+  [menu.main.params]
+    type = 'theme-toggle'
+[[menu.main]]
+  name = 'Search'
+  weight = 3
+  [menu.main.params]
+    type = 'search'
+[[menu.main]]
+  name = 'Source'
+  url = 'https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker'
+  weight = 4
+[[menu.main]]
+  name = 'License & notices'
+  pageRef = '/licensing'
+  weight = 5
+
+[params]
+  description = 'Keep score, review races, and share Mario Kart World standings. A clear guide from installation to race night.'
+  repository = 'https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/blob/main/'
+  externalLinkDecoration = true
+  displayUpdatedAuthor = false
+  displayUpdatedDate = false
+[params.navbar]
+  width = 'full'
+  displayTitle = true
+  displayLogo = false
+[params.theme]
+  default = 'system'
+  displayToggle = false
+[params.page]
+  width = 'full'
+[params.page.contextMenu]
+  enable = false
+[params.search]
+  enable = true
+  type = 'flexsearch'
+[params.search.flexsearch]
+  index = 'content'
+  tokenize = 'forward'
+  js = 'vendor/flexsearch.bundle.min.js'
+[params.highlight.copy]
+  enable = true
+  display = 'always'
+[params.footer]
+  width = 'full'
+  enable = true
+  displayCopyright = false
+  displayPoweredBy = true
+[params.imageZoom]
+  enable = false

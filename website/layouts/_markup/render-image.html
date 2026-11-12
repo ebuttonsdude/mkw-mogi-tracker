@@ -1,0 +1,6 @@
+{{- $destination := .Destination -}}
+{{- $url := urls.Parse $destination -}}
+{{- if not $url.IsAbs -}}
+  {{- $destination = relURL (strings.TrimPrefix "/" (path.Clean (path.Join .PageInner.File.Dir $url.Path))) -}}
+{{- end -}}
+<figure><img src="{{ $destination | safeURL }}" alt="{{ .PlainText }}" loading="lazy"{{ with .Title }} title="{{ . }}"{{ end }}>{{ with .Title }}<figcaption>{{ . }}</figcaption>{{ end }}</figure>

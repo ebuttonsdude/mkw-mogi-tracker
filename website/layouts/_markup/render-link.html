@@ -1,0 +1,24 @@
+{{- $destination := .Destination -}}
+{{- $url := urls.Parse $destination -}}
+{{- $license := index site.Data.license_links $destination -}}
+{{- if $license -}}
+  {{- $destination = relURL $license -}}
+{{- else if and (not $url.IsAbs) $url.Path -}}
+  {{- $path := path.Clean (path.Join .PageInner.File.Dir $url.Path) -}}
+  {{- $suffix := cond $url.RawQuery (printf "?%s" $url.RawQuery) "" -}}
+  {{- with $url.Fragment }}{{ $suffix = printf "%s#%s" $suffix . }}{{ end -}}
+  {{- if hasPrefix $path "../" -}}
+    {{- $destination = printf "%s%s%s" site.Params.repository (strings.TrimPrefix "../" $path) $suffix -}}
+  {{- else if strings.HasSuffix $path ".md" -}}
+    {{- $pagePath := strings.TrimSuffix ".md" $path -}}
+    {{- if eq (path.Base $pagePath) "_index" }}{{ $pagePath = path.Dir $pagePath }}{{ end -}}
+    {{- with site.GetPage $pagePath -}}
+      {{- $destination = printf "%s%s" .RelPermalink $suffix -}}
+    {{- else -}}
+      {{- errorf "Unresolved documentation link %q in %s" $destination $.PageInner.File.Path -}}
+    {{- end -}}
+  {{- else -}}
+    {{- $destination = printf "%s%s" (relURL (strings.TrimPrefix "/" $path)) $suffix -}}
+  {{- end -}}
+{{- end -}}
+<a href="{{ $destination | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text | safeHTML }}</a>

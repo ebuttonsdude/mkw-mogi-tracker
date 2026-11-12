@@ -1,0 +1,374 @@
+[
+  {
+    "file": "easyname-90.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 90000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 18,
+      "vr": 8805,
+      "delta": -46,
+      "phase": "change"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-94.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 94000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 18,
+      "vr": 8759,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-96.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 96000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 5,
+      "vr": 8576,
+      "delta": 52,
+      "phase": "change"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-98.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 98000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 5,
+      "vr": 8628,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-386.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 386000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 1,
+      "vr": 8631,
+      "delta": 13,
+      "phase": "change"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-388.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 388000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 1,
+      "vr": 8644,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-330.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 330000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      0,
+      0,
+      1280,
+      720
+    ],
+    "result": null,
+    "course": "Koopa Troopa Beach"
+  },
+  {
+    "file": "easyname-480.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 480000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      0,
+      0,
+      1280,
+      720
+    ],
+    "result": null,
+    "course": "SNES Choco Island 1"
+  },
+  {
+    "file": "hardname-330.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 330000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      0,
+      0,
+      1280,
+      720
+    ],
+    "result": null,
+    "course": "Dandelion Depths"
+  },
+  {
+    "file": "hardname-60.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 60000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      0,
+      0,
+      1280,
+      720
+    ],
+    "result": null,
+    "course": null
+  },
+  {
+    "file": "hardname-384.5.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 384500,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 1,
+      "vr": 8566,
+      "delta": 78,
+      "phase": "change"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-389.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 389000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": null,
+    "course": null
+  },
+  {
+    "file": "hardname-500-ffmpeg.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 500000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "extraction": "FFmpeg scale=1280:720",
+    "result": {
+      "position": 4,
+      "vr": 8689,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-380.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 380000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 8,
+      "vr": 8763,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-1330.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 1330000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 11,
+      "vr": 8788,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-945.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 945000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 15,
+      "vr": 8752,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "easyname-1455.webp",
+    "source": "video-samples/WW-with-cuts-easyname.mkv",
+    "offset_ms": 1455000,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 21,
+      "vr": 8737,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  },
+  {
+    "file": "hardname-235.5-ffmpeg.webp",
+    "source": "video-samples/WW-with-cuts-hardname.mkv",
+    "offset_ms": 235500,
+    "frame_size": [
+      1280,
+      720
+    ],
+    "crop": [
+      670,
+      15,
+      1250,
+      705
+    ],
+    "result": {
+      "position": 21,
+      "vr": 8566,
+      "delta": null,
+      "phase": "final"
+    },
+    "course": null
+  }
+]

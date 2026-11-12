@@ -1,0 +1,9 @@
+include DESIGN.md AGENTS.md ATTRIBUTION.md .gitignore
+include LICENSE COPYING.md THIRD_PARTY_NOTICES.md
+recursive-include LICENSES *.txt
+include startWindows.bat setupWindows.bat setupLinux.sh startLinux.sh
+recursive-include docs *.md
+recursive-include tools *.py *.sh
+include tools/ci.Dockerfile
+recursive-include tests *.py *.json *.md
+recursive-include mkw_tracker/profiles *.json

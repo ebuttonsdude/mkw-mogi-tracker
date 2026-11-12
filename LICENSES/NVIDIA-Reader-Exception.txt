@@ -1,0 +1,25 @@
+MKW-Mogi-Tracker NVIDIA reader additional permission
+Additional permission under GNU AGPL version 3, section 7
+
+Copyright (C) 2026 avidgamer0 (ebuttonsdude).
+
+The copyright holder grants permission to link or combine MKW-Mogi-Tracker
+with NVIDIA CUDA driver libraries, NVIDIA CUDA Toolkit runtime and math
+libraries (including CUDA Runtime, NVRTC, nvJitLink, cuBLAS, cuFFT, cuRAND,
+cuSOLVER, cuSPARSE, CUPTI and NVTX), NVIDIA cuDNN, and NVIDIA CUTLASS DSL
+components, solely to implement this program's optional local machine-learning
+inference readers, and to convey the resulting combination.
+
+Those NVIDIA components remain governed by their own licenses. This permission
+does not grant rights to them or waive compliance with their licenses, including
+their installation, use and redistribution conditions.
+
+The Corresponding Source required for this program need not include the source
+of those NVIDIA components. This permission does not remove source-disclosure,
+licensing or notice obligations for this program, modifications to it, or its
+integration code, including the obligations under AGPL version 3, section 13.
+
+No permission is granted to combine this program with other proprietary
+application code under this exception. This is an additional permission, not
+a restriction on the rights otherwise granted by AGPL version 3. Its retention
+or removal is governed by section 7 of that license.

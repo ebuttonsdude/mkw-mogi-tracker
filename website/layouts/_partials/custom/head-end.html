@@ -1,0 +1,18 @@
+<style>
+{{ range site.Data.characters }}
+html[data-character="{{ .id }}"] {
+  {{ range $key, $value := .tokens }}--character-{{ $key }}: {{ $value | safeCSS }};{{ end }}
+}
+{{ end }}
+</style>
+<script>
+try {
+  const saved = localStorage.getItem('mkw-docs-character') || 'mario';
+  const allowed = [{{ range site.Data.characters }}{{ .id }},{{ end }}"light"];
+  const choice = allowed.includes(saved) ? saved : 'mario';
+  document.documentElement.dataset.character = choice;
+  document.documentElement.classList.toggle('dark', choice !== 'light');
+  document.documentElement.classList.toggle('light', choice === 'light');
+  localStorage.setItem('color-theme', choice === 'light' ? 'light' : 'dark');
+} catch (_) {}
+</script>

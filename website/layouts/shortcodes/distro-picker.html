@@ -1,0 +1,9 @@
+<div class="distro-picker" data-distro-picker>
+  <div role="tablist" aria-label="Linux distribution">
+    <button type="button" role="tab" id="tab-arch" aria-controls="panel-arch" aria-selected="true">Arch Linux</button>
+    <button type="button" role="tab" id="tab-fedora" aria-controls="panel-fedora" aria-selected="false" tabindex="-1">Fedora</button>
+    <button type="button" role="tab" id="tab-ubuntu" aria-controls="panel-ubuntu" aria-selected="false" tabindex="-1">Ubuntu</button>
+  </div>
+  {{ .Inner }}
+</div>
+<script src="{{ "distro-picker.js" | relURL }}" defer></script>

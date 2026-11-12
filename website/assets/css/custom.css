@@ -1,0 +1,61 @@
+/* Calm, scan-friendly documentation. No custom web fonts or animation. */
+:root { --primary-hue: 190deg; --primary-saturation: 85%; }
+.content { line-height: 1.8; }
+.content h2 { margin-top: 2.4rem; }
+.content h3 { margin-top: 1.8rem; }
+.content ol > li, .content ul > li { margin-top: .55rem; }
+.content figure { margin: 1.5rem 0; }
+.content img { border-radius: .75rem; border: 1px solid #94a3b84d; }
+.content figcaption { font-size: .875rem; line-height: 1.5; color: #64748b; margin-top: .5rem; }
+.dark .content figcaption { color: #94a3b8; }
+.content a { text-underline-offset: .2em; }
+.content details { padding: .85rem 1rem; border: 1px solid #94a3b84d; border-radius: .5rem; }
+.content summary { cursor: pointer; font-weight: 650; }
+.content pre { max-width: 100%; overflow-x: auto; }
+:focus-visible { outline: 3px solid #0891b2; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}
+
+/* Exact built-in tracker tokens are generated from themes.py during the build. */
+.character-picker { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 0; }
+.character-picker select { border: 1px solid #94a3b8; border-radius: .4rem; padding: .4rem .7rem; max-width: 100%; }
+html[data-character]:not([data-character="light"]),
+html[data-character]:not([data-character="light"]) body {
+  background: var(--character-bg); color: var(--character-text);
+}
+html[data-character]:not([data-character="light"]) :is(nav, aside, footer, .hextra-nav-container-blur, .hextra-sidebar-container) {
+  background-color: var(--character-panel); color: var(--character-text);
+}
+html[data-character]:not([data-character="light"]) :is(select, input, pre, code) {
+  background-color: var(--character-input); color: var(--character-text);
+}
+html[data-character]:not([data-character="light"]) :is(.content a, .content h1, .content h2, .content h3) { color: var(--character-accent); }
+html[data-character]:not([data-character="light"]) .content { color: var(--character-text); }
+html[data-character]:not([data-character="light"]) :focus-visible { outline-color: var(--character-accent); }
+.distro-picker [role="tablist"] { display: flex; gap: .5rem; overflow-x: auto; padding: .3rem; }
+.distro-picker [role="tab"] { flex-shrink: 0; padding: .5rem .8rem; border: 1px solid #94a3b8; border-radius: .4rem; }
+.distro-picker [aria-selected="true"] { background: var(--character-accent, #0891b2); color: var(--character-accent_text, white); }
+.distro-picker [role="tabpanel"] { padding: .5rem 0; }
+.distro-picker [hidden], [data-distro-note][hidden] { display: none; }
+
+/* Let the page use the viewport, while the navigation columns keep their width. */
+:root { --hextra-max-content-width: 100%; --docs-panel: #f8fafc; }
+html[data-character]:not([data-character="light"]) { --docs-panel: var(--character-panel); }
+.docs-layout { min-height: calc(100dvh - var(--hextra-navbar-height)); }
+.docs-layout > .hextra-toc,
+.docs-layout > .hextra-sidebar-container { background-color: var(--docs-panel); }
+.hextra-nav-container .character-picker { flex-shrink: 0; font-size: .875rem; }
+.hextra-nav-container .character-picker select { width: 10rem; }
+/* The upstream sticky TOC footer paints a dark shadow even with its button hidden. */
+.hextra-toc div:has(> #backToTop) { background-color: var(--docs-panel); box-shadow: none; }
+@media (min-width: 48rem) {
+  .docs-layout > .hextra-sidebar-container { height: calc(100dvh - var(--hextra-navbar-height)); }
+  .docs-layout > .hextra-sidebar-container > .hextra-scrollbar { height: 100%; }
+}
+/* Keep the title/search/menu row intact and put the picker on a second header row. */
+@media (max-width: 47.99rem) {
+  :root { --hextra-navbar-height: 7rem; }
+  .hextra-nav-container nav { flex-wrap: wrap; align-content: center; row-gap: .5rem; }
+  .hextra-nav-container .character-picker { order: 1; flex-basis: 100%; }
+}

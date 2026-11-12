@@ -1,0 +1,120 @@
+# Local dependencies, downloads and generated builds.
+.venv/
+venv/
+.local/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Agent runtime state and local evidence are not project source.
+/.agent/
+.omx/
+.omx-state-locks/
+.omx-state-locks.identity.json
+
+# Keep source recordings and uploaded copies local. Extension patterns apply
+# anywhere in the repository and match uppercase/mixed-case filenames too.
+video-samples/
+uploads/
+*.[mM][pP]4
+*.[mM][kK][vV]
+*.[mM][oO][vV]
+*.[aA][vV][iI]
+*.[wW][eE][bB][mM]
+*.[mM]4[vV]
+*.[mM][pP][eE][gG]
+*.[mM][pP][gG]
+*.[tT][sS]
+*.[mM][tT][sS]
+*.[mM]2[tT][sS]
+*.[fF][lL][vV]
+*.[fF]4[vV]
+*.[wW][mM][vV]
+*.[aA][sS][fF]
+*.[vV][oO][bB]
+*.[oO][gG][vV]
+*.[oO][gG][mM]
+*.3[gG][pP]
+*.3[gG]2
+*.[mM][xX][fF]
+*.[mM]1[vV]
+*.[mM]2[vV]
+*.[dD][iI][vV][xX]
+*.[rR][mM]
+*.[rR][mM][vV][bB]
+*.[qQ][tT]
+*.[yY]4[mM]
+*.[hH]264
+*.[hH]265
+*.[hH][eE][vV][cC]
+*.[aA][vV]1
+
+# Rotating diagnostic logs are local runtime data, including custom data folders.
+logs/
+
+# Runtime databases, backups, capture state and generated standings.
+*.sqlite*
+*.db
+*.db-*
+*.db.*
+capture.json
+imports.json
+team-standings.txt
+team-standings.md
+tracker-mode.json
+overlay-profiles.json*
+ww-rating.txt
+ww-rating.md
+
+# Downloaded model weights should never be added to Git.
+*.safetensors
+*.onnx
+*.pt
+*.pth
+*.gguf
+
+# Local environment secrets.
+.env
+.env.*
+!.env.example
+# Private local OBS connection credentials, including interrupted atomic writes.
+obs-connection.json
+.obs-connection-*.tmp
+
+# Custom theme/icon and FFA runtime data.
+custom-themes/
+player-standings.txt
+player-standings.md
+
+# Local environment may be a shared development symlink.
+.venv
+custom-themes.json
+.themes-*.tmp
+
+# Local custom theme backup files.
+custom-themes*.json
+
+# Generated documentation output and Hugo build caches.
+/public/
+/website/public/
+/website/resources/
+/website/.hugo_build.lock
+
+# Private external vision configuration and interrupted writes/backups.
+external-vision*.json*
+.external-vision-*.tmp
+
+# Generated CI toolchain identity; downloaded tools stay in the runner's local image.
+/ci-toolchain.env
+
+# User-owned local course pictures and interrupted atomic writes.
+course-images*.json
+.course-images-*.tmp
+
+# User-owned Lounge background images and interrupted atomic writes.
+overlay-backgrounds*.json
+.overlay-backgrounds-*.tmp

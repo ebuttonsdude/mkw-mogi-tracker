@@ -1,0 +1,8 @@
+<div class="character-picker">
+  <label for="character-theme">Website theme</label>
+  <select id="character-theme">
+    <option value="light">Standard light</option>
+    {{ range site.Data.characters }}<option value="{{ .id }}">{{ .name }}</option>{{ end }}
+  </select>
+</div>
+<script src="{{ "character-theme.js" | relURL }}" defer></script>

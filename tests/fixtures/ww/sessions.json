@@ -1,0 +1,144 @@
+{
+  "provenance": {
+    "issue": "https://gitlab.sandal.tech/ebuttonsdude/mkw-livesplit-vos/-/work_items/20",
+    "source": "Two original recordings supplied by the repository owner, local-only under video-samples/.",
+    "verification": "Course sequence, finishing position and final VR manually inspected in the source recordings. Evidence times are file-relative seconds for inspection, not expected detection times.",
+    "unknowns": "VR changes are intentionally not reference assertions. Missing changes are allowed. Hardname ends during Peach Stadium with no final result.",
+    "timestamps": "No independently measured intro timestamps supplied. Validation only requires known, nonnegative, strictly increasing file-relative intro offsets.",
+    "media": "Original video files are excluded from source control; this JSON contains observations only."
+  },
+  "samples": {
+    "hardname": {
+      "filename": "WW-with-cuts-hardname.mkv",
+      "width": 2560,
+      "height": 1440,
+      "fps": 60,
+      "expected_pending": 1,
+      "races": [
+        {
+          "course": "Toad's Factory",
+          "position": 5,
+          "vr_after": 8628,
+          "manual_evidence_seconds": 100
+        },
+        {
+          "course": "Boo Cinema",
+          "position": 21,
+          "vr_after": 8566,
+          "manual_evidence_seconds": 235.5
+        },
+        {
+          "course": "Dandelion Depths",
+          "position": 1,
+          "vr_after": 8644,
+          "manual_evidence_seconds": 390
+        },
+        {
+          "course": "Moo Moo Meadows",
+          "position": 4,
+          "vr_after": 8689,
+          "manual_evidence_seconds": 505
+        },
+        {
+          "course": "Wario Stadium",
+          "position": 1,
+          "vr_after": 8754,
+          "manual_evidence_seconds": 620
+        },
+        {
+          "course": "Airship Fortress",
+          "position": 12,
+          "vr_after": 8723,
+          "manual_evidence_seconds": 736.5
+        },
+        {
+          "course": "Crown City",
+          "position": 5,
+          "vr_after": 8758,
+          "manual_evidence_seconds": 885
+        },
+        {
+          "course": "Peach Stadium",
+          "position": null,
+          "vr_after": null,
+          "manual_evidence_seconds": 993
+        }
+      ]
+    },
+    "easyname": {
+      "filename": "WW-with-cuts-easyname.mkv",
+      "width": 2560,
+      "height": 1440,
+      "fps": 60,
+      "expected_pending": 0,
+      "races": [
+        {
+          "course": "Dandelion Depths",
+          "position": 18,
+          "vr_after": 8759,
+          "manual_evidence_seconds": 96
+        },
+        {
+          "course": "Shy Guy Bazaar",
+          "position": 16,
+          "vr_after": 8736,
+          "manual_evidence_seconds": 242
+        },
+        {
+          "course": "Koopa Troopa Beach",
+          "position": 8,
+          "vr_after": 8763,
+          "manual_evidence_seconds": 380
+        },
+        {
+          "course": "SNES Choco Island 1",
+          "position": 13,
+          "vr_after": 8759,
+          "manual_evidence_seconds": 520
+        },
+        {
+          "course": "Cheep Cheep Falls",
+          "position": 10,
+          "vr_after": 8779,
+          "manual_evidence_seconds": 670
+        },
+        {
+          "course": "Bowser's Castle",
+          "position": 15,
+          "vr_after": 8765,
+          "manual_evidence_seconds": 810
+        },
+        {
+          "course": "Dry Bones Burnout",
+          "position": 15,
+          "vr_after": 8752,
+          "manual_evidence_seconds": 945
+        },
+        {
+          "course": "Airship Fortress",
+          "position": 6,
+          "vr_after": 8801,
+          "manual_evidence_seconds": 1080
+        },
+        {
+          "course": "Mario Bros. Circuit",
+          "position": 17,
+          "vr_after": 8773,
+          "manual_evidence_seconds": 1205
+        },
+        {
+          "course": "Mario Circuit",
+          "position": 11,
+          "vr_after": 8788,
+          "manual_evidence_seconds": 1330
+        },
+        {
+          "course": "Wario's Shipyard",
+          "position": 21,
+          "vr_after": 8737,
+          "manual_evidence_seconds": 1455
+        }
+      ]
+    }
+  }
+}
