@@ -1,6 +1,6 @@
 {
   "provenance": {
-    "issue": "https://gitlab.sandal.tech/ebuttonsdude/mkw-livesplit-vos/-/work_items/20",
+    "issue": "mkw-livesplit-vos issue #20 (original owner-supplied evidence)",
     "source": "Two original recordings supplied by the repository owner, local-only under video-samples/.",
     "verification": "Course sequence, finishing position and final VR manually inspected in the source recordings. Evidence times are file-relative seconds for inspection, not expected detection times.",
     "unknowns": "VR changes are intentionally not reference assertions. Missing changes are allowed. Hardname ends during Peach Stadium with no final result.",

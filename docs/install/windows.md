@@ -25,7 +25,7 @@ Windows 10 and Windows 11 have been tested. Windows is tested occasionally; Arch
 
 ```powershell
 cd "$HOME"
-git clone "https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git"
+git clone --branch main "https://github.com/ebuttonsdude/mkw-mogi-tracker.git"
 ```
 
 If the download fails, check the URL and the exact error. Do not put passwords or tokens in commands, screenshots, or bug reports.
@@ -35,7 +35,7 @@ If the download fails, check the URL and the exact error. Do not put passwords o
 <details>
 <summary><strong>Alternative: download a ZIP without Git</strong></summary>
 
-1. [Download the tracker ZIP](https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/archive/main/mkw-mogi-tracker-main.zip).
+1. [Download the tracker ZIP](https://github.com/ebuttonsdude/mkw-mogi-tracker/archive/refs/heads/main.zip).
 2. Right-click the downloaded file and select **Extract All…**, then **Extract**.
 3. Open the extracted **mkw-mogi-tracker-main** folder. If it contains another folder with that name, open that one too.
 
@@ -133,15 +133,16 @@ Manual-only setup does not install image/capture packages. Run normal setup late
 
 Stop the tracker and [back up your data](../data-and-backups.md) before updating. The default data folder is **.local → tracker** inside the tracker folder. A backup can include a saved OBS password; keep it private. Imported original recordings need their own backup.
 
-**Git installation:** open PowerShell in your tracker folder as described above, then run:
+**Git installation:** the clone command above sets the GitHub repository as
+`origin` and tracks `main`. Open PowerShell in your tracker folder, then run:
 
 ```powershell
 git pull --ff-only
 ```
 
-Start with **startWindows.bat** afterward. If an update changes dependencies, rerun **setupWindows.bat** with your reader choice. If Git refuses because of local changes, keep the error; do not delete or reset files to force it through.
+Start with **startWindows.bat** afterward. If an update changes dependencies, rerun **setupWindows.bat** with your reader choice. If Git refuses a fast-forward or reports local changes, keep the error and your existing folder; do not delete, reset, or rebase files to force it through.
 
-**ZIP installation:** download and extract the latest ZIP, then copy its source files into your existing tracker folder. Keep **.local** and **.venv** intact. Do not replace saved data or move an existing virtual environment to a different folder. Follow any dependency-update instructions, then start normally.
+**ZIP installation:** [download the latest GitHub ZIP](https://github.com/ebuttonsdude/mkw-mogi-tracker/archive/refs/heads/main.zip) and extract it, then copy its source files into your existing tracker folder. Keep **.local** and **.venv** intact. Do not replace saved data or move an existing virtual environment to a different folder. Follow any dependency-update instructions, then start normally.
 
 ## If something gets stuck
 

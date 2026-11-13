@@ -43,14 +43,14 @@ class DocsSiteTests(unittest.TestCase):
                          'Overwrite', '--include-videos', '--include-models', '--everything',
                          '--preview', '--only', '--non-interactive', 'counts', 'size', 'one run'):
             self.assertIn(required, guide)
-        self.assertIn('(docs/migrator.md)', (root / 'README.md').read_text())
+        self.assertIn('(https://ebuttonsdude.github.io/mkw-mogi-tracker/migrator/)', (root / 'README.md').read_text())
         self.assertIn('(migrator.md)', pages[0])
 
     def test_readme_starts_with_published_installation_and_user_guide_link(self):
         readme = (Path(__file__).resolve().parents[1] / 'README.md').read_text()
         self.assertTrue(readme.startswith(
             '# MKW-Mogi-Tracker\n\n**[Installation instructions and user guide]'
-            '(https://mkw-mogi-tracker-0315ea.pages.sandal.tech/)**\n'))
+            '(https://ebuttonsdude.github.io/mkw-mogi-tracker/)**\n'))
 
     def test_recognition_docs_omit_internal_validation_narratives(self):
         root = Path(__file__).resolve().parents[1]
@@ -79,7 +79,7 @@ class DocsSiteTests(unittest.TestCase):
 
     def test_windows_quick_start_quotes_url_and_keeps_backend_advice_simple(self):
         guide = (Path(__file__).resolve().parents[1] / 'docs/install/windows.md').read_text()
-        self.assertIn('```powershell\ncd "$HOME"\ngit clone "https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git"\n```', guide)
+        self.assertIn('```powershell\ncd "$HOME"\ngit clone --branch main "https://github.com/ebuttonsdude/mkw-mogi-tracker.git"\n```', guide)
         paragraph = guide.split('**Recommended GGUF setup:**', 1)[1].split('\n\n', 1)[0]
         self.assertEqual(paragraph, ' choose **Vulkan GPU** if your GPU is Vulkan compatible, '
                          'or **CPU** if you do not want GPU acceleration (may be very slow).')

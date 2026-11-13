@@ -40,7 +40,7 @@ disableKinds = ['taxonomy', 'term', 'RSS']
     type = 'search'
 [[menu.main]]
   name = 'Source'
-  url = 'https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker'
+  url = 'https://github.com/ebuttonsdude/mkw-mogi-tracker'
   weight = 4
 [[menu.main]]
   name = 'License & notices'
@@ -49,7 +49,7 @@ disableKinds = ['taxonomy', 'term', 'RSS']
 
 [params]
   description = 'Keep score, review races, and share Mario Kart World standings. A clear guide from installation to race night.'
-  repository = 'https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/blob/main/'
+  repository = 'https://github.com/ebuttonsdude/mkw-mogi-tracker/blob/main/'
   externalLinkDecoration = true
   displayUpdatedAuthor = false
   displayUpdatedDate = false

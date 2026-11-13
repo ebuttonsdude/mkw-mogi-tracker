@@ -87,7 +87,7 @@ def main():
                 page.get_by_role('link', name='License & source', exact=True).click()
                 expect(page.get_by_role('heading', name='License & source', exact=True)).to_be_visible()
                 expect(page.locator('#project-source')).to_have_attribute(
-                    'href', 'https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker')
+                    'href', 'https://github.com/ebuttonsdude/mkw-mogi-tracker')
                 expect(page.get_by_text('NO WARRANTY', exact=True)).to_be_visible()
                 page.set_viewport_size({'width': 360, 'height': 800})
                 expect(page.locator('#project-source')).to_be_visible()

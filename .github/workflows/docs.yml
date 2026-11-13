@@ -1,0 +1,98 @@
+name: Publish documentation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Keep wiki pushes and Pages deployments ordered; never force-push either repo.
+concurrency:
+  group: documentation-publication
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'ebuttonsdude/mkw-mogi-tracker' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Check documentation and wiki conversion
+        run: python -m unittest tests.test_docs_site tests.test_wiki_export tests.test_wiki_sync tests.test_docs_publication -v
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Build and validate the website
+        env:
+          DOCS_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: python tools/build_docs.py --base-url "$DOCS_BASE_URL/"
+      - name: Build and validate the wiki
+        run: python tools/build_wiki.py
+      - name: Upload the website only
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: .local/site-public
+
+  pages:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  wiki:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Generate wiki pages
+        run: python tools/build_wiki.py
+      - name: Publish generated wiki pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GIT_TERMINAL_PROMPT: '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$auth"
+          wiki="$RUNNER_TEMP/mkw-docs-wiki"
+          if ! git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" \
+            clone "https://github.com/$GITHUB_REPOSITORY.wiki.git" "$wiki"; then
+            echo '::error::Enable the repository wiki and create its first Home page on GitHub, then rerun this job.'
+            exit 1
+          fi
+          python tools/sync_wiki.py --source .local/wiki-public --destination "$wiki"
+          git -C "$wiki" add --all
+          if git -C "$wiki" diff --cached --quiet; then
+            echo 'Wiki is already up to date.'
+            exit 0
+          fi
+          git -C "$wiki" -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "Update documentation from $GITHUB_SHA"
+          git -C "$wiki" -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD

@@ -13,7 +13,7 @@ redistribute and sell it under those terms. Hosting, installation and support
 can be paid services. There is **no warranty**, including no implied warranty
 of merchantability or fitness for a particular purpose.
 
-- [Public source repository](https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker)
+- [Public source repository](https://github.com/ebuttonsdude/mkw-mogi-tracker)
 - [Full AGPLv3 license](../LICENSE)
 - [Project grant and scope](../COPYING.md)
 - [NVIDIA reader additional permission](../LICENSES/NVIDIA-Reader-Exception.txt)
@@ -55,5 +55,5 @@ installers need an audit of their actual bundled libraries, notices and source
 obligations, including LGPL FFmpeg where present.
 
 Game-derived rank masks retain the separate rights/provenance boundary described
-in [source and asset attribution](https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/blob/main/ATTRIBUTION.md).
+in [source and asset attribution](https://github.com/ebuttonsdude/mkw-mogi-tracker/blob/main/ATTRIBUTION.md).
 This project does not grant third-party artwork or trademark rights.

@@ -19,26 +19,46 @@ python3 tools/build_docs.py --base-url http://127.0.0.1:1313/
 
 On Linux amd64, the helper downloads and caches the pinned build tools under `.local/`. On other platforms, provide a matching Hugo extended executable with `--hugo /path/to/hugo`.
 
-Cached archives are checksum-checked on every use. Transient download failures receive up to three attempts; errors identify the tool and download host. In CI, these archives are prepared once in the [reusable toolchain](contributing.md#reusable-ci-tools), so warm browser and Pages jobs do not download them again.
+Cached archives are checksum-checked on every use. Transient download failures receive up to three attempts; errors identify the tool and download host. GitHub's disposable documentation jobs download the same pinned, verified archives without installing the tracker or its optional readers.
 
 Output goes to `.local/site-public/`. The site serves its search runtime locally rather than requiring a third-party CDN. **License & notices** links to the project's license and the theme, search, CSS and icon notices. The build retains upstream CSS/JavaScript license comments and copies only the explicitly listed legal files; third-party components keep their own licenses.
 
-## Publish with GitLab Pages
+## Publish with GitHub Pages and the wiki
 
-The default-branch Pages job accepts **public or private** project visibility.
-Missing or unsupported visibility values fail before the build starts. Changing
-the repository from private to public does not require a different build command.
+The main public guide is [GitHub Pages](https://ebuttonsdude.github.io/mkw-mogi-tracker/).
+The [GitHub wiki](https://github.com/ebuttonsdude/mkw-mogi-tracker/wiki) is a second
+view of the same `docs/` files, not an independently maintained guide.
 
-Repository visibility and **Pages access control are separate settings**. The
-GitLab instance enforces the selected Pages audience; the CI script does not
-change or verify that setting. To make a public project's documentation public,
-its Pages access setting must also permit that audience. A private deployment
-can retain its project-member-only Pages access.
+The [GitHub repository](https://github.com/ebuttonsdude/mkw-mogi-tracker) contains
+the documentation source. Edit `docs/` rather than generated wiki pages.
+In GitHub, select **Settings → Pages → Source: GitHub Actions**. Enable the wiki
+under **Settings → General → Features**, then create a placeholder **Home** page
+once so GitHub initializes the wiki repository.
 
-Publication still uses the verified toolchain
-image in a disposable private-PID container. It streams tracked source into the
-container and returns only the generated documentation; it never mounts the
-checkout, credentials, devices or Docker socket inside the build container.
+`.github/workflows/docs.yml` runs on `main` pushes, or manually from
+**Actions → Publish documentation → Run workflow**. It runs the non-spawning
+documentation/export checks and builds both outputs before publishing. These
+publications deliberately **run documentation checks only**, independently of
+application/browser testing. A failed docs check
+blocks both publishers. A wiki initialization or push failure does not block the
+independent Pages deployment; fix the reported prerequisite and rerun the job.
+
+The website build uses the Pages-provided base URL, including its repository
+subpath. Only `.local/site-public/` is uploaded, never the checkout or local data.
+The wiki exporter removes Hugo front matter, converts its shortcodes, rewrites
+navigation and image links, and generates a sidebar:
+
+```sh
+python3 tools/build_wiki.py
+```
+
+Output goes to `.local/wiki-public/`. The sync helper updates a separate wiki
+clone, removes only obsolete generated pages recorded in its manifest, and
+preserves unrelated pages. **Home** is the initial placeholder exception.
+Generated pages must be edited in `docs/`; local edits to them conflict with the
+next sync. Publishing uses the job's short-lived `GITHUB_TOKEN`, with
+`contents: write` only for the wiki job. Pages deployment uses `pages: write`
+and `id-token: write`. No extra personal token is stored in source.
 
 ## Preview
 

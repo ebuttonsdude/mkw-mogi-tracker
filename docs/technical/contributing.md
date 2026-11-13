@@ -95,7 +95,7 @@ Include what changed, the checks you ran, their results, and any remaining gaps.
 
 ## Reusable CI tools
 
-GitLab's **toolchain** job prepares a reusable Docker image. It contains the Python environment, Chromium and its system dependencies, OCR test data, and checksum-verified documentation archives. Later jobs use that exact image in fresh containers with fresh tracked source. Normal jobs reuse the image instead of reinstalling tools.
+The application CI **toolchain** job prepares a reusable Docker image. It contains the Python environment, Chromium and its system dependencies, OCR test data, and checksum-verified documentation archives. Later jobs use that exact image in fresh containers with fresh tracked source. Normal jobs reuse the image instead of reinstalling tools.
 
 Only the recipe and setup scripts belong in Git—not browsers, downloaded archives, environments or image layers. The cache lives in the runner's Docker storage, outside the checkout. Cleaning the checkout does not remove it. A new runner or a removed image needs a cold build; changing the declared toolchain inputs selects a new image automatically.
 

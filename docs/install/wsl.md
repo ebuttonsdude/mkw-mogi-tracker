@@ -42,7 +42,7 @@ Close and reopen Ubuntu so `uv` is available.
 Keep the project in your Linux home folder, not under `/mnt/c`.
 
 ```sh
-git clone https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git
+git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git
 cd mkw-mogi-tracker
 uv run --no-project --python 3.12 python tools/setup.py
 ```

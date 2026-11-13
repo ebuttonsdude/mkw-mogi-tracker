@@ -24,7 +24,7 @@ class APIReadTests(unittest.TestCase):
         self.assertIn('GNU AGPLv3', content)
         self.assertIn('NO WARRANTY', content)
         self.assertIn('NVIDIA-Reader-Exception.txt', content)
-        self.assertIn('https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker', content)
+        self.assertIn('https://github.com/ebuttonsdude/mkw-mogi-tracker', content)
         self.assertNotIn(str(self.root), content)
         self.assertEqual(self.request('/license', headers={'Host': 'evil.example'})[0], 403)
         for path in ('/license/../credentials.py', '/static/legal.html', '/source.tar.gz'):

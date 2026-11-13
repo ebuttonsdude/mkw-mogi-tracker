@@ -1,6 +1,8 @@
 # MKW-Mogi-Tracker
 
-**[Installation instructions and user guide](https://mkw-mogi-tracker-0315ea.pages.sandal.tech/)**
+**[Installation instructions and user guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/)**
+
+Also available in the [GitHub wiki](https://github.com/ebuttonsdude/mkw-mogi-tracker/wiki).
 
 **Less scorekeeping. More racing.**
 
@@ -30,8 +32,6 @@ You use the app in your browser. Your scores and recordings stay local. An optio
 
 **Choose your operating system below.** Run one block at a time. Each route downloads the project and opens guided setup.
 
-No AppImage or Windows installer is available yet; those are [tracked in issue #2](https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/work_items/2).
-
 <details>
 <summary><strong>Arch Linux</strong> — primary tested platform</summary>
 
@@ -39,13 +39,13 @@ Open a terminal:
 
 ```sh
 sudo pacman -S --needed git uv tesseract tesseract-data-eng noto-fonts-cjk
-git clone https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git
+git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git
 cd mkw-mogi-tracker
 sh setupLinux.sh
 sh startLinux.sh
 ```
 
-Open **http://127.0.0.1:8765**. [Full Arch steps](docs/install/linux.md#arch-linux)
+Open **http://127.0.0.1:8765**. [Full Arch steps](https://ebuttonsdude.github.io/mkw-mogi-tracker/install/linux/#arch-linux)
 
 </details>
 
@@ -56,13 +56,13 @@ Open a terminal:
 
 ```sh
 sudo dnf install git uv tesseract google-noto-sans-cjk-fonts
-git clone https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git
+git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git
 cd mkw-mogi-tracker
 sh setupLinux.sh
 sh startLinux.sh
 ```
 
-Open **http://127.0.0.1:8765**. Fedora Atomic editions need a different route. [Full Fedora steps](docs/install/linux.md#fedora)
+Open **http://127.0.0.1:8765**. Fedora Atomic editions need a different route. [Full Fedora steps](https://ebuttonsdude.github.io/mkw-mogi-tracker/install/linux/#fedora)
 
 </details>
 
@@ -80,20 +80,20 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Close and reopen the terminal, then:
 
 ```sh
-git clone https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git
+git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git
 cd mkw-mogi-tracker
 sh setupLinux.sh
 sh startLinux.sh
 ```
 
-Open **http://127.0.0.1:8765**. [Full Ubuntu steps](docs/install/linux.md#ubuntu)
+Open **http://127.0.0.1:8765**. [Full Ubuntu steps](https://ebuttonsdude.github.io/mkw-mogi-tracker/install/linux/#ubuntu)
 
 </details>
 
 <details>
 <summary><strong>Native Windows</strong> — no WSL required</summary>
 
-**[Follow the step-by-step Windows guide →](docs/install/windows.md)**
+**[Follow the step-by-step Windows guide →](https://ebuttonsdude.github.io/mkw-mogi-tracker/install/windows/)**
 
 1. Download the project with Git or extract its ZIP.
 2. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and [Tesseract for Windows](https://github.com/UB-Mannheim/tesseract/wiki).
@@ -127,13 +127,15 @@ sh startLinux.sh
 
 Open **http://localhost:8765** from Windows.
 
-Enable **WSL Settings → Networking → Mirrored**, apply the change and reboot Windows before connecting Windows OBS. The maintainer validated this route with NVIDIA NF4. Follow the [WSL guide](docs/install/wsl.md); NVFP4 remains unvalidated in WSL.
+Enable **WSL Settings → Networking → Mirrored**, apply the change and reboot Windows before connecting Windows OBS. The maintainer validated this route with NVIDIA NF4. Follow the [WSL guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/install/wsl/); NVFP4 remains unvalidated in WSL.
 
 </details>
 
 **Keep the terminal open while using the tracker.** Setup runs once; next time, run `sh startLinux.sh` from the project folder (or double-click **startWindows.bat** on Windows).
 
-Want to score manually without capture? See the [minimal setup](docs/technical/installation.md#guided-setup-without-prompts).
+Already installed? Follow the [update instructions](https://ebuttonsdude.github.io/mkw-mogi-tracker/getting-started/#updating).
+
+Want to score manually without capture? See the [minimal setup](https://ebuttonsdude.github.io/mkw-mogi-tracker/technical/installation/#guided-setup-without-prompts).
 
 ## Which reader should I choose?
 
@@ -148,29 +150,29 @@ A name reader helps read players from screenshots. Qwen is recommended for more 
 
 GGUF uses the same base 4B model as NF4, but a different quantization and runtime: **a small paired check found similar results, but broad quality parity is not established**. Vulkan needs a compatible driver; RX 6800 XT and Arc B580 are targets, not validated cards. Try recordings first, especially on CPU. If NF4 already works well for you, there is no need to switch; this recommendation is about compatibility and download size, not a proven speed or accuracy advantage.
 
-Not every RTX 50-series card has enough memory for NVFP4. Leave space for OBS and other apps. [Download sizes and reader details](docs/recognition.md)
+Not every RTX 50-series card has enough memory for NVFP4. Leave space for OBS and other apps. [Download sizes and reader details](https://ebuttonsdude.github.io/mkw-mogi-tracker/recognition/)
 
 **Accept setup’s default-reader offer, or select your installed reader in the dashboard.** Automatic does not select GGUF, NF4, INT8, or NVFP4.
 
-**Already run a vision model on this or another trusted computer?** Configure the optional [External vision endpoint](docs/recognition.md#external-vision-endpoint) under **Settings → Experimental**. No server is installed or started for you.
+**Already run a vision model on this or another trusted computer?** Configure the optional [External vision endpoint](https://ebuttonsdude.github.io/mkw-mogi-tracker/recognition/#external-vision-endpoint) under **Settings → Experimental**. No server is installed or started for you.
 
 ## Your first session
 
 1. Choose **Mogi Teams**, **Mogi FFA**, or **Worldwides** at the top.
 2. Create a new session in **Capture & review**.
-3. [Connect OBS](docs/obs.md), import a recording, or enter a race manually.
+3. [Connect OBS](https://ebuttonsdude.github.io/mkw-mogi-tracker/obs/), import a recording, or enter a race manually.
 4. For mogi results, check all twelve names and their finishing order, then **confirm**. Partial finishing screenshots prefill only proven visible positions; unknown slots stay blank for you to complete.
 5. View **Standings**. Save a PNG from **Race history**, or show the OBS overlay.
 
-**Experimental YOLO mode:** Settings → Experimental can automatically confirm future Mogi results, including incomplete detections. It is off by default and requires accepting a warning. Missing players become distinct `not-detected-fixme` entries. [Read the risks and controls](docs/user-guide.md#experimental-yolo-mode) before enabling it.
+**Experimental YOLO mode:** Settings → Experimental can automatically confirm future Mogi results, including incomplete detections. It is off by default and requires accepting a warning. Missing players become distinct `not-detected-fixme` entries. [Read the risks and controls](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#experimental-yolo-mode) before enabling it.
 
-**Course pictures:** upload your own local thumbnails under **Settings → Course pictures**, or activate them with the migrator, including the old tracker’s coded track filenames. [Upload guidance and a suggested download prompt](docs/user-guide.md#course-pictures). No course artwork is bundled.
+**Course pictures:** upload your own local thumbnails under **Settings → Course pictures**, or activate them with the migrator, including the old tracker’s coded track filenames. [Upload guidance and a suggested download prompt](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#course-pictures). No course artwork is bundled.
 
 **Choose your font:** expand **Settings → Overlay & PNG font**, preview a local font, save it for both outputs, or reset to the default. You can add your own TTF/OTF files to the data folder’s `fonts/` directory.
 
 The **Overlays** tab holds source controls and an apply-to-preview workflow. Settings keeps themes first; font, backup and Experimental sections start collapsed. **Race history → Collapse all** closes the current mode’s session folders. WW PNG course tables use **Mean position** and **Mean VR change**, matching Standings.
 
-[Follow the simple user guide →](docs/user-guide.md)
+[Follow the simple user guide →](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/)
 
 ## Diagnostic logs
 
@@ -199,20 +201,20 @@ Each file rotates at **2 MiB**, keeping **three backups** (`.log.1`–`.log.3`):
 
 Diagnostics omit passwords, tokens, request headers/bodies, screenshots, player names, recording paths and raw exception text. HTTP diagnostics use status codes rather than URLs. Raw model-worker stderr is discarded. Existing `.local/logs/*-ocr.log` files are not deleted; review those separately before sharing. Logs are local runtime data, excluded from Git and application packages. Review any files before sharing them; dashboard capture/import status messages remain available for more specific operation errors.
 
-To move an existing installation, run `.venv/bin/python -m mkw_tracker.migrate "/path/to/mkw-livesplit-vos"`. The terminal menu shows category counts and size estimates, offers **select everything**, and asks for confirmation before importing. Local migration is separate from web ZIP backup limits. See the [migration guide](docs/migrator.md).
+To move an existing installation, run `.venv/bin/python -m mkw_tracker.migrate "/path/to/mkw-livesplit-vos"`. The terminal menu shows category counts and size estimates, offers **select everything**, and asks for confirmation before importing. Local migration is separate from web ZIP backup limits. See the [migration guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/migrator/).
 
 ## Find what you need
 
 | Task | Guide |
 | --- | --- |
-| Install or start the app | [Getting started](docs/getting-started.md) |
-| Run a team or FFA session | [User guide](docs/user-guide.md) |
-| Track worldwide VR | [Worldwides](docs/ww.md) |
-| Capture or display standings in OBS | [OBS setup](docs/obs.md) |
-| Fix a problem | [Troubleshooting](docs/troubleshooting.md) |
-| Move from mkw-livesplit-vos | [Migration guide](docs/migrator.md) |
-| Protect saved sessions | [Backups](docs/data-and-backups.md) |
-| Install manually, build, or contribute | [Technical reference](docs/technical/_index.md) |
+| Install or start the app | [Getting started](https://ebuttonsdude.github.io/mkw-mogi-tracker/getting-started/) |
+| Run a team or FFA session | [User guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/) |
+| Track worldwide VR | [Worldwides](https://ebuttonsdude.github.io/mkw-mogi-tracker/ww/) |
+| Capture or display standings in OBS | [OBS setup](https://ebuttonsdude.github.io/mkw-mogi-tracker/obs/) |
+| Fix a problem | [Troubleshooting](https://ebuttonsdude.github.io/mkw-mogi-tracker/troubleshooting/) |
+| Move from mkw-livesplit-vos | [Migration guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/migrator/) |
+| Protect saved sessions | [Backups](https://ebuttonsdude.github.io/mkw-mogi-tracker/data-and-backups/) |
+| Install manually, build, or contribute | [Technical reference](https://ebuttonsdude.github.io/mkw-mogi-tracker/technical/) |
 
 ### About this project
 
@@ -223,12 +225,12 @@ linking permission**. Commercial use, hosting and support are allowed; covered
 distributed modifications and modified network services must meet the license's
 source-sharing requirements. See [the license grant](COPYING.md),
 [full license](LICENSE), [third-party notices](THIRD_PARTY_NOTICES.md) and
-[licensing guide](docs/licensing.md). Third-party software and assets retain
+[licensing guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/licensing/). Third-party software and assets retain
 their own terms.
 
 The documentation website adapts to your browser width, with character themes in the header and edge-aligned navigation on desktop.
 
-For contributors, CI reuses a runner-local toolchain while keeping each test run isolated. Downloaded tools are never committed. See [CI cache and clean rebuilds](docs/technical/contributing.md#reusable-ci-tools).
+For contributors, CI reuses a runner-local toolchain while keeping each test run isolated. Downloaded tools are never committed. See [CI cache and clean rebuilds](https://ebuttonsdude.github.io/mkw-mogi-tracker/technical/contributing/#reusable-ci-tools).
 
 ### Named OBS sources and optional Lounge cards
 
@@ -241,9 +243,13 @@ are individually selectable. Compact name/MMR/division badges expand into symbol
 inline stat bubbles with short time-window labels, selectable backgrounds and borders,
 recent Win % and optional last-five W/L form. There are no on-stream timestamps.
 The source editor offers an available-font dropdown and estimated compact OBS dimensions. Unknown values and stale data stay clearly marked.
-See [Overlay sources and compact Lounge cards](docs/overlay-profiles.md) for setup,
+See [Overlay sources and compact Lounge cards](https://ebuttonsdude.github.io/mkw-mogi-tracker/overlay-profiles/) for setup,
 privacy, API boundaries and official-source definitions.
 
 ### Custom Lounge card appearance
 
-In **Overlays → Source content and Lounge cards**, use **Counter HUD style** for a glossy charcoal double-rim card, or upload your own PNG/JPEG/WebP background per source. Uploads stay local; choose **Uploaded image** and save/apply to use it. See [overlay appearance and upload limits](docs/overlay-profiles.md#style-a-compact-broadcast-card).
+In **Overlays → Source content and Lounge cards**, use **Counter HUD style** for a glossy charcoal double-rim card, or upload your own PNG/JPEG/WebP background per source. Uploads stay local; choose **Uploaded image** and save/apply to use it. See [overlay appearance and upload limits](https://ebuttonsdude.github.io/mkw-mogi-tracker/overlay-profiles/#style-a-compact-broadcast-card).
+
+---
+
+<sub>Made with AI assistance from Qwen3.8-27b, Qwen3.8-Flash-Next, GPT-6.1-Sol, and GPT-6-Astra.</sub>

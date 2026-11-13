@@ -107,7 +107,7 @@ Course names, evidence, recording-relative timing and chapter correction/export 
 
 ## Mogi FFA
 
-[Mogi FFA (#64)](https://gitlab.sandal.tech/ebuttonsdude/mkw-livesplit-vos/-/work_items/64) is a separate UI choice alongside Mogi Teams and Worldwides. It reuses Mogi scoring, capture/import, confirmation, correction and penalty logic rather than creating synthetic teams. FFA has its own saved data context and history under `ffa/`, with a persisted session format. Switching modes resumes that mode's session; existing team sessions are never converted.
+Mogi FFA is a separate UI choice alongside Mogi Teams and Worldwides. It reuses Mogi scoring, capture/import, confirmation, correction and penalty logic rather than creating synthetic teams. FFA has its own saved data context and history under `ffa/`, with a persisted session format. Switching modes resumes that mode's session; existing team sessions are never converted.
 
 FFA requires twelve distinct finishers and the same 82 points per race. Capture results remain pending until explicitly confirmed. Team creation, assignments and name-initial bootstrap are unavailable. The dashboard, OBS overlay, folder PNG and text/Markdown exports present individual players, with Unicode-capable names, player-ID highlighting, net points and gaps. Player charts replace team charts in FFA PNGs. The shared OBS overlay URL follows the active mode, retaining transparency, reduced motion and last-good state.
 
@@ -257,9 +257,15 @@ Follow the [contribution checks](docs/technical/contributing.md#validation) with
 ## Beginner documentation website
 
 The documentation is a separate static Hugo/Hextra website; it never hosts the
-tracker, its API, or saved user data. GitLab Pages is restricted to project
-members until a deliberate publication decision. A configurable base URL keeps
-the same content portable to GitHub Pages and project subpaths.
+tracker, its API, or saved user data. GitHub Pages is the primary public guide;
+public source and license links use the GitHub repository. A configurable
+base URL supports root deployments and project subpaths. GitHub Actions publishes Pages and a generated GitHub wiki from the
+same `docs/` sources after documentation checks only; it does not wait for the
+separate application/browser pipeline. Existing application CI keeps its
+full-test gate. The wiki strips front matter, translates Hugo shortcodes,
+rewrites navigation/assets and owns only manifest-recorded generated pages.
+No user data or downloaded tools are published. User-facing repository and
+source/license links point at GitHub.
 
 ### Information architecture and content voice
 

@@ -60,7 +60,7 @@ Close and reopen the terminal after it finishes.
 These commands are the same for every distribution above.
 
 ```sh
-git clone https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker.git
+git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git
 cd mkw-mogi-tracker
 sh setupLinux.sh
 ```

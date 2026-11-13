@@ -40,7 +40,7 @@ No. It labels your report and links to a table. It does not submit or edit anyth
 
 ## Are downloadable installers available?
 
-Not yet. Use [guided setup](getting-started.md). Linux AppImage and Windows packaging are tracked in [issue #2](https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker/-/work_items/2).
+Not yet. Use [guided setup](getting-started.md). AppImage and Windows installer packages are not available yet.
 
 ## Can I move saved sessions to another installation?
 

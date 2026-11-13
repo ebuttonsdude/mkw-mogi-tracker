@@ -28,7 +28,7 @@ boundary for game-derived recognition masks and user-supplied assets.
 
 ## Corresponding source
 
-Public repository: <https://gitlab.sandal.tech/ebuttonsdude/mkw-mogi-tracker>.
+Public repository: <https://github.com/ebuttonsdude/mkw-mogi-tracker>.
 The repository includes the source, installation/build scripts and tests.
 Distributors must make the corresponding source for their actual version
 available using a method allowed by the license. Modified network services
