@@ -1112,6 +1112,10 @@ def make_server(app, port=8765, host="127.0.0.1"):
                     return app.obs_connection.forget_password()
                 if self.command == "POST" and path == "/api/sessions":
                     return store.create_session(data.get("name"), data.get("expected_session_id"))
+                if self.command == "POST" and re.fullmatch(r"/api/folders/[^/]+/race-order", path):
+                    if set(data) != {'race_ids', 'expected_ids'}:
+                        raise ValueError('Expected the previous and new race order')
+                    return store.reorder_history(path.split("/")[3], data['race_ids'], data['expected_ids'])
                 if self.command == "POST" and re.fullmatch(r"/api/folders/[^/]+/load", path):
                     return store.load_session(path.split("/")[3], data.get("expected_session_id"))
                 if self.command == "DELETE" and re.fullmatch(r"/api/folders/[^/]+", path):

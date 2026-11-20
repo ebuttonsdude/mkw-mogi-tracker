@@ -5,6 +5,8 @@
 .standings > .panel{min-width:0}
 @media(max-width:1000px){.standings{grid-template-columns:minmax(0,1fr)}}
 
+.race-drag { cursor: grab; user-select: none; }
+.race-drag:active { cursor: grabbing; }
 .row-actions,.folder-heading{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.folder-heading{justify-content:space-between}.folder-heading h3{margin:0}.history-folder{border-top:1px solid var(--line);padding-top:20px;margin-top:20px;min-width:0}.history-controls{margin-bottom:20px}
 /* Section navigation stays beside the document, never over dashboard controls. */
 .dashboard-layout{display:grid;grid-template-columns:180px minmax(0,1480px);max-width:1700px;margin:auto;gap:8px;align-items:start}.dashboard-layout main{width:100%;min-width:0}.section-nav{position:sticky;top:16px;padding:24px 8px 24px 16px;display:grid;gap:8px}.section-nav a{padding:8px 12px;border-radius:6px;text-decoration:none;color:var(--muted)}.section-nav a:hover,.section-nav a:focus-visible{color:var(--text);background:var(--panel)}a{color:var(--teal)}section[id]{scroll-margin-top:16px}.folder-heading{cursor:pointer;list-style:revert;display:list-item;padding:4px}.folder-heading>span{font-size:1.05rem;font-weight:650;margin-right:16px}.folder-controls{margin:16px 0}.folder-controls label{flex:0 1 240px}.course-title{display:flex;align-items:center;gap:12px;min-width:180px}.course-icon{width:72px;height:44px;object-fit:cover;border-radius:4px}.import-job{border-top:1px solid var(--line);margin-top:20px;padding-top:12px}.import-job h3{font-size:1rem;overflow-wrap:anywhere}progress{max-width:100%;width:320px;accent-color:var(--teal)}#obs-text-path{overflow-wrap:anywhere}#room-points{font-weight:700;font-variant-numeric:tabular-nums}

@@ -6,7 +6,7 @@ let wwEditing = null;
 let timingEditing = null;
 let penaltyEditing = null;
 let evidenceEditing = null;
-let refreshing = false;
+let refreshing = null;
 let externalDraftRevision = 0;
 let externalActionRevision = 0;
 let externalStateRevision = 0;
@@ -431,6 +431,55 @@ function rememberVisibleFolderExpansion() {
     try { localStorage.setItem(folderExpansionKey, JSON.stringify(folderExpansion)); } catch { /* Storage is optional. */ }
   }
 }
+// Controls operate on the displayed list; the store accepts oldest-first IDs.
+let dragRaceRow = null;
+function addRaceOrderControls(body, races, folder, direction) {
+  if ($('history-sort').value !== 'history_order' || races.length < 2) return;
+  const rows = Array.from(body.rows);
+  const ids = races.map(race => race.id);
+  const ascending = list => direction === 1 ? list : [...list].reverse();
+  async function move(from, to) {
+    const reordered = [...ids];
+    reordered.splice(to, 0, reordered.splice(from, 1)[0]);
+    await api(`/api/folders/${encodeURIComponent(folder.id)}/race-order`, 'POST',
+      {expected_ids: ascending(ids), race_ids: ascending(reordered)});
+    await refresh(false, true);
+    const moved = Array.from($('history').querySelectorAll('tr[data-race-id]')).find(row => same(row.dataset.raceId, ids[from]));
+    moved?.querySelector('.race-order button')?.focus();
+    message(`Moved ${races[from].course} to row ${to + 1} of ${ids.length}.`);
+  }
+  rows.forEach((row, index) => {
+    const controls = el('div', undefined, 'row-actions race-order');
+    const handle = el('span', '⠿ Drag', 'race-drag');
+    handle.draggable = true;
+    handle.title = 'Drag onto another race in this folder to take its place';
+    handle.addEventListener('dragstart', event => {
+      dragRaceRow = row;
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(ids[index]));
+    });
+    handle.addEventListener('dragend', () => { dragRaceRow = null; });
+    row.addEventListener('dragover', event => {
+      if (dragRaceRow?.parentNode === body && dragRaceRow !== row) event.preventDefault();
+    });
+    row.addEventListener('drop', event => {
+      if (dragRaceRow?.parentNode !== body || dragRaceRow === row) return;
+      event.preventDefault();
+      const from = rows.indexOf(dragRaceRow);
+      dragRaceRow = null;
+      move(from, index).catch(error => message(error.message, true));
+    });
+    controls.append(handle);
+    for (const step of [-1, 1]) {
+      if (!rows[index + step]) continue;
+      const label = step < 0 ? 'Move up' : 'Move down';
+      const control = button(label, () => move(index, index + step));
+      control.setAttribute('aria-label', `${label}: ${races[index].course}, row ${index + 1}`);
+      controls.append(control);
+    }
+    row.cells[0].append(controls);
+  });
+}
 function renderHistory() {
   if (state.tracker_mode === 'ww') { renderWWHistory(); return; }
   rememberVisibleFolderExpansion();
@@ -442,7 +491,8 @@ function renderHistory() {
   const races = state.races.filter((race) => !folderId || same(race.folder_id, folderId));
   races.sort((a, b) => {
     let comparison;
-    if (key === 'course' || key === 'status') comparison = String(a[key] || '').localeCompare(String(b[key] || ''));
+    if (key === 'history_order') comparison = a.history_order - b.history_order;
+    else if (key === 'course' || key === 'status') comparison = String(a[key] || '').localeCompare(String(b[key] || ''));
     else if (key === 'offset_ms') {
       if (a.offset_ms == null || b.offset_ms == null) return Number(a.offset_ms == null) - Number(b.offset_ms == null);
       comparison = a.offset_ms - b.offset_ms;
@@ -518,6 +568,7 @@ function renderHistory() {
       cell(row, resultControls);
       historyBody.append(row);
     });
+    addRaceOrderControls(historyBody, members, folder, direction);
     const wrap = el('div', undefined, 'table-wrap'); wrap.append(historyTable); section.append(wrap); return section;
   });
   $('history').replaceChildren(...(groups.length ? groups : [el('p', 'No race folders yet.', 'muted')]));
@@ -663,6 +714,7 @@ function renderWWHistory() {
     const races = state.races.filter(race => same(race.folder_id, folder.id));
     const order = new Map(races.map((race, index) => [race.id, index]));
     races.sort((a, b) => {
+      if (key === 'history_order') return direction * (a.history_order - b.history_order);
       if (key === 'offset_ms') {
         if (a.offset_ms == null || b.offset_ms == null) return Number(a.offset_ms == null) - Number(b.offset_ms == null);
         return direction * (a.offset_ms - b.offset_ms);
@@ -688,6 +740,7 @@ function renderWWHistory() {
       cell(row, actions); body.append(row);
     });
     const wrap = el('div', undefined, 'table-wrap');
+    addRaceOrderControls(body, races, folder, direction);
     wrap.append(races.length ? historyTable : el('p', 'No races in this WW session.', 'muted'));
     group.append(wrap);
     return group;
@@ -829,9 +882,15 @@ function render() {
     if (race) document.querySelectorAll('#placements select').forEach((select) => options(select, alphabetical(racePlayers(race)), 'Choose player'));
   }
 }
-async function refresh(background = false) {
-  if (refreshing) return;
-  refreshing = true;
+async function refresh(background = false, afterCurrent = false) {
+  // A reorder requires a snapshot started after its write. Other callers
+  // still coalesce overlapping polls/refreshes without waiting.
+  while (refreshing) {
+    if (!afterCurrent) return;
+    await refreshing;
+  }
+  let finish;
+  refreshing = new Promise(resolve => { finish = resolve; });
   try {
     const endpointRevision = externalStateRevision;
     const next = await api('/api/state');
@@ -859,13 +918,13 @@ async function refresh(background = false) {
       $('capture').textContent = captureStatus();
     } else render();
     if (background) window.scrollTo(scroll);
-  } finally { refreshing = false; }
+  } finally { refreshing = null; finish(); }
 }
 function canAutoRefresh() {
-  return $('auto-refresh').checked && !$('folder-png-preview').open;
+  return !dragRaceRow && $('auto-refresh').checked && !$('folder-png-preview').open;
 }
 function canRedraw() {
-  return !backupBusy && !$('external-settings').dataset.testing && !themeMutationBusy && themeImageReads === 0 &&
+  return !document.querySelector('.race-order :focus') && !backupBusy && !$('external-settings').dataset.testing && !themeMutationBusy && themeImageReads === 0 &&
     wwEditing === null && editing === null && timingEditing === null && penaltyEditing === null &&
     !document.querySelector('input:focus, select:focus, textarea:focus, [contenteditable]:focus') &&
     !document.querySelector('button:disabled:not(#camera-start):not(#camera-stop):not(#folder-png-copy):not(#theme-update):not(#theme-delete):not(#external-test):not(#external-test-cancel):not(#backup-select-all):not(#backup-export):not(#backup-confirm):not(#lounge-use-size)');

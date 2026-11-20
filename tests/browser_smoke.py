@@ -1089,6 +1089,21 @@ def main():
                 refresh()
                 tab("Race history")
                 page.locator("#history-folder").select_option(api("/api/state")["session"]["folder_id"])
+                # History order is independent of the temporary column sorts.
+                page.locator("#history-sort").select_option("history_order")
+                page.locator("#history-direction").select_option("desc")
+                rows = page.locator("#history tbody tr")
+                first_id, second_id = rows.evaluate_all("rs => rs.slice(0, 2).map(r => r.dataset.raceId)")
+                with page.expect_response(lambda r: r.url.endswith("/race-order")) as ordered:
+                    rows.first.get_by_role("button", name="Move down:", exact=False).press("Enter")
+                assert ordered.value.ok
+                expect(rows.first).to_have_attribute("data-race-id", second_id)
+                refresh()
+                expect(rows.nth(1)).to_have_attribute("data-race-id", first_id)
+                with page.expect_response(lambda r: r.url.endswith("/race-order")) as ordered:
+                    rows.nth(1).locator(".race-drag").drag_to(rows.first.locator(".race-drag"))
+                assert ordered.value.ok
+                expect(rows.first).to_have_attribute("data-race-id", first_id)
                 page.locator("#history-sort").select_option("course")
                 page.locator("#history-direction").select_option("asc")
                 expect(page.locator("#history tbody tr").first).to_contain_text("Mario Circuit")

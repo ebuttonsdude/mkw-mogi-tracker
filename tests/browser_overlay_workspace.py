@@ -310,7 +310,8 @@ def main():
                     app.switch_tracker_mode('ww', app.store.active_session()['id'])
                 # A competing interval/explicit refresh is coalesced, not awaited.
                 page.evaluate('refresh(true)')
-                assert page.evaluate('refreshing') and len(held) == 1
+                # Inspect the pending poll; returning its promise would wait on the held response.
+                assert page.evaluate('Boolean(refreshing)') and len(held) == 1
                 release()
                 # Keep the one-shot handler installed through the next request:
                 # later polls must pass through rather than become held too.

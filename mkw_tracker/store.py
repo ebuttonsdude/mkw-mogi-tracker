@@ -115,7 +115,7 @@ class TrackerStore:
             "sessions": [("folder_id", "TEXT REFERENCES history_folders(id)"),
                          ("format", "TEXT NOT NULL DEFAULT 'teams'")],
             "races": [("folder_id", "TEXT REFERENCES history_folders(id)"),
-                      ("created_at", "TEXT"),
+                      ("created_at", "TEXT"), ("history_order", "INTEGER"),
                       ("auto_confirmed", "INTEGER NOT NULL DEFAULT 0 CHECK(auto_confirmed IN (0,1))")],
         }
         for table, columns in additions.items():
@@ -123,6 +123,7 @@ class TrackerStore:
             for name, declaration in columns:
                 if name not in existing:
                     self._write(f"ALTER TABLE {table} ADD COLUMN {name} {declaration}")
+        self._write("UPDATE races SET history_order=rowid WHERE history_order IS NULL")
         for session in self._rows("SELECT * FROM sessions WHERE folder_id IS NULL ORDER BY rowid"):
             folder_id = self._new_folder("Session " + session["started_at"], session["started_at"])
             self._write("UPDATE sessions SET folder_id=? WHERE id=?", (folder_id, session["id"]))
@@ -452,10 +453,11 @@ class TrackerStore:
                     raise ValueError("race_id already has different metadata")
             else:
                 self._write("""INSERT INTO races
-                    (id, session_id, course, recording_id, offset_ms, revision, folder_id, created_at)
-                    VALUES (?, ?, ?, ?, ?, 0, ?, ?)""",
+                    (id, session_id, course, recording_id, offset_ms, revision, folder_id, created_at, history_order)
+                    VALUES (?, ?, ?, ?, ?, 0, ?, ?,
+                            (SELECT COALESCE(MAX(history_order),0)+1 FROM races WHERE session_id=?))""",
                     (race_id, session["id"], course, recording_id, offset_ms,
-                     folder_id or session["folder_id"], _now()))
+                     folder_id or session["folder_id"], _now(), session["id"]))
         return self._race(race_id)
 
     def _race(self, race_id):
@@ -640,6 +642,21 @@ class TrackerStore:
         session = self._rows('SELECT id, format FROM sessions WHERE folder_id=?', (folder_id,))[0]
         folder.update(session_id=session['id'], format=session['format'])
         return folder
+
+    def reorder_history(self, folder_id, race_ids, expected_ids):
+        """Change only presentation order, never scoring or capture chronology."""
+        with self._transaction():
+            owner = self._folder(folder_id)['session_id']
+            ids = [r['id'] for r in self._rows(
+                'SELECT id FROM races WHERE session_id=? ORDER BY history_order,rowid', (owner,))]
+            if expected_ids != ids:
+                raise ValueError('Race history changed; refresh before reordering')
+            if (not isinstance(race_ids, list) or len(race_ids) != len(ids)
+                    or not all(isinstance(r, str) for r in race_ids) or set(race_ids) != set(ids)):
+                raise ValueError('Choose each race in this folder exactly once')
+            self._db.executemany('UPDATE races SET history_order=? WHERE id=?',
+                                 enumerate(race_ids, start=1)).close()
+        return {'ok': True}
 
     def _expect_session(self, expected_session_id):
         if expected_session_id != self._session_id():

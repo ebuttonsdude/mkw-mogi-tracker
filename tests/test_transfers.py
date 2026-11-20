@@ -41,6 +41,8 @@ def populate(root, mode='mogi'):
         store.correct_result('same-race-id', players[::-1])
         store.add_penalty('same-race-id', players[0], 2, 'test')
     store.create_race('pending', 'Pending')
+    store.reorder_history(store.active_session()['folder_id'], ['pending', 'same-race-id'],
+                          ['same-race-id', 'pending'])
     name = str(uuid4()) + '.png'
     directory = transfers.evidence_dir(root, mode)
     directory.mkdir(parents=True, exist_ok=True)
@@ -87,9 +89,19 @@ class TransfersTests(unittest.TestCase):
                 self.assertEqual(len(store._rows('SELECT * FROM ww_results' if mode == 'ww'
                                                 else 'SELECT * FROM result_revisions')), 6)
                 self.assertEqual(store._rows('SELECT * FROM races WHERE id="same-race-id"')[0]['revision'], 2)
+                self.assertEqual(store._rows('SELECT DISTINCT history_order FROM races WHERE revision=0'),
+                                 [{'history_order': 1}])
                 self.assertFalse(store._rows('PRAGMA foreign_key_check'))
             finally:
                 store.close()
+
+    def test_older_archive_without_manual_order_uses_saved_insertion_order(self):
+        payload = self.payload()
+        races = payload['modes']['mogi']['races']
+        for race in races:
+            del race['history_order']
+        transfers.validate(payload)
+        self.assertEqual([r['history_order'] for r in races], [1, 2])
 
     def test_schema_relationships_and_scores_rejected(self):
         original = self.payload()
