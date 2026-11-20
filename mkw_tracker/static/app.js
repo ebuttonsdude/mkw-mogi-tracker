@@ -6,7 +6,7 @@ let wwEditing = null;
 let timingEditing = null;
 let penaltyEditing = null;
 let evidenceEditing = null;
-let refreshing = false;
+let refreshing = null;
 let externalDraftRevision = 0;
 let externalActionRevision = 0;
 let externalStateRevision = 0;
@@ -443,7 +443,7 @@ function addRaceOrderControls(body, races, folder, direction) {
     reordered.splice(to, 0, reordered.splice(from, 1)[0]);
     await api(`/api/folders/${encodeURIComponent(folder.id)}/race-order`, 'POST',
       {expected_ids: ascending(ids), race_ids: ascending(reordered)});
-    await refresh();
+    await refresh(false, true);
     const moved = Array.from($('history').querySelectorAll('tr[data-race-id]')).find(row => same(row.dataset.raceId, ids[from]));
     moved?.querySelector('.race-order button')?.focus();
     message(`Moved ${races[from].course} to row ${to + 1} of ${ids.length}.`);
@@ -869,9 +869,15 @@ function render() {
     if (race) document.querySelectorAll('#placements select').forEach((select) => options(select, alphabetical(racePlayers(race)), 'Choose player'));
   }
 }
-async function refresh(background = false) {
-  if (refreshing) return;
-  refreshing = true;
+async function refresh(background = false, afterCurrent = false) {
+  // A reorder requires a snapshot started after its write. Other callers
+  // still coalesce overlapping polls/refreshes without waiting.
+  while (refreshing) {
+    if (!afterCurrent) return;
+    await refreshing;
+  }
+  let finish;
+  refreshing = new Promise(resolve => { finish = resolve; });
   try {
     const endpointRevision = externalStateRevision;
     const next = await api('/api/state');
@@ -898,7 +904,7 @@ async function refresh(background = false) {
       $('capture').textContent = captureStatus();
     } else render();
     if (background) window.scrollTo(scroll);
-  } finally { refreshing = false; }
+  } finally { refreshing = null; finish(); }
 }
 function canAutoRefresh() {
   return !dragRaceRow && $('auto-refresh').checked && !$('folder-png-preview').open;
