@@ -44,6 +44,11 @@ class FFAReportTests(unittest.TestCase):
         self.assertEqual(player['races'][0]['net_points'], -5)
         series = next(p for p in cumulative_player_series(report) if p['id'] == self.ids[-1])
         self.assertEqual(series['values'], [-5, None, None])
+        self.store.reorder_history(self.folder, ['later', 'first', 'pending'], ['first', 'pending', 'later'])
+        report = folder_report(self.snapshot(), self.folder)
+        series = next(p for p in cumulative_player_series(report) if p['id'] == self.ids[-1])
+        self.assertEqual([r['id'] for r in report['races']], ['later', 'first', 'pending'])
+        self.assertEqual(series['values'], [1, -4, None])
 
     def test_text_and_markdown_are_player_only_and_escape_names(self):
         self.store.update_player(self.ids[0], '選手 | <Ω>', None)

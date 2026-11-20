@@ -1,4 +1,4 @@
-"""Manual display order is independent of scoring and recording chronology."""
+"""Saved race order is shared by dashboard and output snapshots."""
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -34,7 +34,9 @@ class HistoryOrderTests(unittest.TestCase):
                 try:
                     races = store.snapshot()['races']
                     self.assertEqual([(r['id'], r['history_order']) for r in races],
-                                     [('a', 2), ('b', 1), ('foreign', 1), ('new', 3)])
+                                     [('b', 1), ('a', 2), ('new', 3), ('foreign', 1)])
+                    output = store.snapshot(session_id=session['id'], include_history=False)
+                    self.assertEqual([r['id'] for r in output['races']], ['b', 'a', 'new'])
                 finally:
                     store.close()
 

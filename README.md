@@ -164,7 +164,7 @@ Not every RTX 50-series card has enough memory for NVFP4. Leave space for OBS an
 4. For mogi results, check all twelve names and their finishing order, then **confirm**. Partial finishing screenshots prefill only proven visible positions; unknown slots stay blank for you to complete.
 5. View **Standings**. Save a PNG from **Race history**, or show the OBS overlay.
 
-In **Race history**, use **Race order (editable)** to drag a race within its folder or choose **Move up** / **Move down**.
+In **Race history**, use **Race order (editable)** to drag a race within its folder or choose **Move up** / **Move down**. The next folder PNG uses that sequence for its race labels, results and charts.
 
 **Experimental YOLO mode:** Settings → Experimental can automatically confirm future Mogi results, including incomplete detections. It is off by default and requires accepting a warning. Missing players become distinct `not-detected-fixme` entries. [Read the risks and controls](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#experimental-yolo-mode) before enabling it.
 

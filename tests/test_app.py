@@ -868,6 +868,7 @@ class ServerTests(unittest.TestCase):
         store = self.app.store
         race = store.create_race('current', 'Mario Circuit')
         store.create_race('other', 'Rainbow Road')
+        store.reorder_history(race['folder_id'], ['other', 'current'], ['current', 'other'])
         self.assertEqual(self.request('/api/state')[1]['capture']['current_race']['id'], 'other')
         self.app.capture.state['race_id'] = race['id']
         self.assertEqual(self.request('/api/state')[1]['capture']['current_race']['id'], race['id'])

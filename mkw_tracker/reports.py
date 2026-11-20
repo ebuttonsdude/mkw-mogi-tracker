@@ -27,7 +27,7 @@ def _standings(rows):
 
 
 def folder_report(snapshot, folder_id):
-    """Latest placement revisions in insertion/created order, independent of session."""
+    """Latest placement revisions in the folder's saved race order."""
     folder = next((f for f in snapshot['folders'] if f['id'] == folder_id), None)
     if folder is None:
         raise KeyError(folder_id)
@@ -36,8 +36,7 @@ def folder_report(snapshot, folder_id):
                if p['active'] and p['session_id'] == folder['session_id']}
     teams = {t['id']: t for t in snapshot['teams'] + snapshot.get('archived_teams', [])
              if t['active'] and t['session_id'] == folder['session_id']}
-    races = sorted((r for r in snapshot['races'] if r['folder_id'] == folder_id),
-                   key=lambda r: r['created_at'])
+    races = [r for r in snapshot['races'] if r['folder_id'] == folder_id]
     player_rows = {}
     team_rows = {team_id: {'id': team_id, 'name': team['name'], 'points': 0,
                           'gross_points': 0, 'penalty_points': 0, 'races': [None] * len(races)}

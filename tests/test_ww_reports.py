@@ -27,6 +27,30 @@ class WWReportTests(unittest.TestCase):
         if result:
             self.store.set_ww_result(identifier, **result)
 
+    def test_reordered_report_graph_and_recent_window_match_live_and_import_policy(self):
+        ids = [f'r{i}' for i in range(12)]
+        for i, race_id in enumerate(ids):
+            live = i != 1
+            self.race(race_id, race_id, position=1, vr_after=9000 + i,
+                      source='capture' if live else 'import', derive_from_previous=live)
+        self.assertEqual(self.store.snapshot()["ww"]["last_10_change"], 10)
+        # Move the imported observation and original first finish to the end.
+        ordered = ['r2', *ids[3:], 'r1', 'r0']
+        self.store.reorder_history(self.folder, ordered, ids)
+        snapshot = self.store.snapshot()
+        report = ww_folder_report(snapshot, self.folder)
+        self.assertEqual([r['id'] for r in report['races']], ordered)
+        self.assertEqual([p['race_id'] for p in report['graph']], ordered)
+        self.assertEqual(report['graph'], snapshot['ww']['graph'])
+        self.assertEqual(report['current_vr'], 9000)
+        self.assertIsNone(report['starting_vr'])
+        self.assertIsNone(report['last_10_change'])  # import has no observed delta
+        for race in report['races']:
+            self.assertEqual(race['ww_result'], self.store._race(race['id'])['ww_result'])
+            self.assertEqual(race['revision'], 1)
+        self.assertEqual(report['races'][-1]['ww_result']['delta'], -1)
+        self.assertIsNone(report['races'][-2]['ww_result']['delta'])
+
     def image(self, snapshot=None):
         try:
             from PIL import Image
@@ -117,6 +141,17 @@ class WWReportTests(unittest.TestCase):
                 if value is not None:
                     self.assertLessEqual(lower, value)
                     self.assertGreaterEqual(upper, value)
+
+    def test_png_numbers_courses_in_saved_order(self):
+        from mkw_tracker.report_fonts import draw_text
+        self.race('a', 'First entry')
+        self.race('b', 'Second entry')
+        self.store.reorder_history(self.folder, ['b', 'a'], ['a', 'b'])
+        with patch("mkw_tracker.ww_reports.draw_text", wraps=draw_text) as draw:
+            self.image()
+        labels = [call.args[2].split() for call in draw.call_args_list]
+        self.assertIn(['R1', 'Second', 'entry'], labels)
+        self.assertIn(['R2', 'First', 'entry'], labels)
 
     def test_png_pending_long_unicode_and_player_font(self):
         name = "選手☆" * 60
