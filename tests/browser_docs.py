@@ -132,7 +132,8 @@ def main():
                 page.get_by_role('tab', name='Fedora', exact=True).press('ArrowRight')
                 expect(page.locator('#panel-ubuntu')).to_be_visible()
                 expect(page.locator('[data-distro-note="fedora"]')).to_be_hidden()
-                expect(page.get_by_text('git clone https://', exact=False)).to_have_count(1)
+                clone = 'git clone --branch main https://github.com/ebuttonsdude/mkw-mogi-tracker.git'
+                expect(page.get_by_text(clone, exact=False)).to_have_count(1)
                 for width in (320, 390, 540, 768, 1024):
                     page.set_viewport_size({'width': width, 'height': 844})
                     expect(page.get_by_label('Website theme')).to_be_visible()
