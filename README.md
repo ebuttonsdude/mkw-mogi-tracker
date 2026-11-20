@@ -158,7 +158,7 @@ Not every RTX 50-series card has enough memory for NVFP4. Leave space for OBS an
 
 ## Your first session
 
-1. Choose **Mogi Teams**, **Mogi FFA**, or **Worldwides** at the top.
+1. Choose **Mogi Teams**, **Mogi FFA**, or **Worldwides** at the top. Stop capture before switching; clicking the mode control while capturing explains why it is locked.
 2. Create a new session in **Capture & review**.
 3. [Connect OBS](https://ebuttonsdude.github.io/mkw-mogi-tracker/obs/), import a recording, or enter a race manually.
 4. For mogi results, check all twelve names and their finishing order, then **confirm**. Partial finishing screenshots prefill only proven visible positions; unknown slots stay blank for you to complete.

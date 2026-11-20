@@ -164,16 +164,23 @@ class Application:
         name = {'ww': 'ww-rating', 'ffa': 'player-standings'}.get(self.tracker_mode, 'team-standings')
         return self.data_dir.resolve() / f"{name}.{self.settings['standings_format']}"
 
+    def _mode_switch_warning(self, imports):
+        if self.cameras.cleanup_failed or any(thread and thread.is_alive() for thread in (
+                self.cameras.thread, self.capture.thread)):
+            return 'Stop capture before switching tracker modes.'
+        if (self.active_uploads or self.imports.cleanup_failed or imports['active']
+                or (self.imports.thread and self.imports.thread.is_alive())):
+            return 'Finish imports and uploads before switching tracker modes.'
+        return ''
+
     def switch_tracker_mode(self, mode, expected_session_id):
         with self.lock:
             if mode not in ('mogi', 'ffa', 'ww'):
                 raise ValueError('Choose Mogi Teams, Mogi FFA or WW mode')
             self.store._expect_session(expected_session_id)
-            if (self.active_uploads or self.cameras.cleanup_failed or self.imports.cleanup_failed
-                    or self.imports.snapshot()['active']
-                    or any(thread and thread.is_alive() for thread in (
-                        self.cameras.thread, self.capture.thread, self.imports.thread))):
-                raise ValueError('Stop capture and finish imports/uploads before switching tracker mode')
+            warning = self._mode_switch_warning(self.imports.snapshot())
+            if warning:
+                raise ValueError(warning)
             # Initialize before persisting; a failed setup must leave Mogi usable.
             previous = self.tracker_mode
             self._activate_tracker_mode(mode)
@@ -489,6 +496,7 @@ class Application:
                       themes=self.theme_library.themes(), display_standings=self._base_overlay_snapshot(result, self.settings),
                       obs_text_path=str(self.obs_text_path),
                       obs_text_error=self.obs_text_error)
+        result['mode_switch_warning'] = self._mode_switch_warning(result['imports'])
         return result
 
     def close(self):

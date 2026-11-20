@@ -541,7 +541,15 @@ function renderTrackerMode() {
   const ww = state.tracker_mode === 'ww';
   document.body.dataset.trackerMode = state.tracker_mode || 'mogi';
   $('tracker-mode').value = state.tracker_mode || 'mogi';
-  $('tracker-mode').disabled = Boolean(state.cameras?.status?.busy || state.imports?.active);
+  const blocked = Boolean(state.mode_switch_warning);
+  $('tracker-mode').disabled = blocked;
+  $('tracker-mode').hidden = blocked;
+  const button = $('blocked-tracker-mode');
+  button.hidden = !blocked;
+  if (blocked) {
+    button.textContent = $('tracker-mode').selectedOptions[0].textContent;
+    button.setAttribute('aria-label', `Tracker mode: ${button.textContent}. Show why switching is unavailable.`);
+  }
   modeText('product-description', 'Personal VR · Worldwides · Recording chapters', 'Mogi FFA · Individual scores · Recording chapters');
   modeText('player-help', '', 'Twelve individual players. Rename a player without losing their history.');
   modeText('penalty-help', '', 'Penalties deduct points from a player. Only participants in this race are eligible.');
@@ -1237,6 +1245,23 @@ async function mutateTheme(operation) {
 }
 $('custom-theme-form').addEventListener('input', () => { ++themeDraftGeneration; });
 $('character-theme').addEventListener('change', () => { ++themeDraftGeneration; });
+function showModeSwitchWarning(text, anchor, event) {
+  const warning = $('mode-switch-warning');
+  warning.textContent = text;
+  warning.hidden = false;
+  const rect = anchor.getBoundingClientRect();
+  const x = event?.detail ? event.clientX : rect.left;
+  const y = event?.detail ? event.clientY : rect.bottom;
+  warning.style.left = Math.max(8, Math.min(x + 10, innerWidth - warning.offsetWidth - 8)) + 'px';
+  warning.style.top = Math.max(8, Math.min(y + 10, innerHeight - warning.offsetHeight - 8)) + 'px';
+}
+document.addEventListener('click', () => { $('mode-switch-warning').hidden = true; }, true);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') $('mode-switch-warning').hidden = true;
+});
+$('blocked-tracker-mode').addEventListener('click', event => {
+  showModeSwitchWarning(state.mode_switch_warning, event.currentTarget, event);
+});
 $('tracker-mode').addEventListener('change', () => { ++themeDraftGeneration; });
 function themeDraftStatus(text) { $('theme-editor-status').textContent = text; }
 function clearThemeImagePreview() {
@@ -1486,7 +1511,12 @@ $('tracker-mode').addEventListener('change', () => run($('tracker-mode'), async 
     $('history-folder').value = ''; $('import-folder').value = ''; settingsSignature = '';
     await refresh();
     message(`Switched to ${target === 'ww' ? 'Worldwides' : target === 'ffa' ? 'Mogi FFA' : 'Mogi Teams'}. Sessions remain separate.`);
-  } catch (error) { $('tracker-mode').value = state.tracker_mode || 'mogi'; throw error; }
+  } catch (error) {
+    $('tracker-mode').value = state.tracker_mode || 'mogi';
+    if (error.message.endsWith('before switching tracker modes.')) {
+      showModeSwitchWarning(error.message, $('tracker-mode'));
+    } else { throw error; }
+  }
 }));
 $('ww-stats-scope').addEventListener('change', renderWW);
 $('ww-player').addEventListener('input', () => { $('ww-player').dataset.draftStarted = 'true'; });
