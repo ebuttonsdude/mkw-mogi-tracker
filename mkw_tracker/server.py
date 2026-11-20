@@ -481,8 +481,11 @@ class Application:
         latched_id = getattr(self.capture, 'state', {}).get('race_id')
         current = next((race for race in result['races'] if race['id'] == latched_id), None)
         if not latched_id:
-            current = next((race for race in reversed(result['races'])
-                            if race['session_id'] == result['session']['id'] and not race['revision']), None)
+            # With no capture latch, show the newest pending entry, not the
+            # last row of a manually reordered history.
+            current = max((race for race in result['races']
+                           if race['session_id'] == result['session']['id'] and not race['revision']),
+                          key=lambda race: race['entry_order'], default=None)
         result['capture']['current_race'] = current if current and not current['revision'] else None
         result.update(imports=self.imports.snapshot(), videos=self.videos.snapshot(), cameras=self.cameras.snapshot(),
                       obs_connection=self.obs_connection.public(),

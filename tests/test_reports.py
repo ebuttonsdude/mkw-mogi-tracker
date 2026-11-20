@@ -126,6 +126,34 @@ class ReportTests(unittest.TestCase):
         self.assertTrue(text.endswith('Room: 82/984 pts | 1/12 races\n'))
         self.assertEqual(text, team_standings_text(self.store.snapshot()))
 
+    def test_saved_order_drives_png_labels_placements_and_cumulative_points(self):
+        from mkw_tracker.report_fonts import draw_text
+
+        team = self.store.create_team('Solo')
+        self.store.update_player(self.ids[0], 'Driver', team['id'])
+        self.score('a', 'Alpha')
+        self.store.create_race('b', 'Bravo')
+        self.store.submit_result('b', list(reversed(self.ids)))
+        self.store.reorder_history(self.folder, ['b', 'a'], ['a', 'b'])
+        state = self.store.snapshot()
+        # Races may be created seconds or days apart. Don't accidentally test
+        # only the stable-sort tie from creating both during the same second.
+        for race in state['races']:
+            race['created_at'] = '2020-01-01' if race['id'] == 'a' else '2020-01-02'
+        report = folder_report(state, self.folder)
+        member = next(p for p in report['players'] if p['id'] == self.ids[0])
+        self.assertEqual([r['position'] for r in member['races']], [12, 1])
+        series = next(t for t in cumulative_team_series(report) if t['id'] == team['id'])
+        self.assertEqual(series['values'], [1, 16])
+        with patch('mkw_tracker.reports._draw_text', wraps=draw_text) as draw:
+            data = render_folder_png(state, self.folder, highlight_team_id=team['id'],
+                                     highlight_session_id=state['session']['id'])
+        labels = [call.args[2] for call in draw.call_args_list]
+        self.assertEqual([s for s in labels if s.startswith(('R1 ·', 'R2 ·'))],
+                         ['R1 · Bravo', 'R2 · Alpha'] * 2)
+        self.assertEqual([s for s in labels if s.startswith('Place ')], ['Place 12', 'Place 1'])
+        self.assertTrue(data.startswith(b'\x89PNG'))
+
     def test_course_names_have_no_bundled_artwork(self):
         self.assertEqual(COURSE_ICONS, {})
         for course in COURSES:

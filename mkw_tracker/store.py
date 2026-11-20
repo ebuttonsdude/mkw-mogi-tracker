@@ -14,6 +14,8 @@ from uuid import uuid4
 from .track_icons import icon_url
 
 _UNSET = object()
+_RACE_SELECT = """SELECT r.*, r.rowid AS entry_order, first.rowid AS confirmed_order
+    FROM races r LEFT JOIN result_revisions first ON first.race_id=r.id AND first.revision=1"""
 
 
 POINTS = (15, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
@@ -461,10 +463,10 @@ class TrackerStore:
         return self._race(race_id)
 
     def _race(self, race_id):
-        race = self._get("races", race_id)
-        confirmation = self._rows(
-            'SELECT rowid AS input_order FROM result_revisions WHERE race_id=? AND revision=1', (race_id,))
-        race['confirmed_order'] = confirmation[0]['input_order'] if confirmation else None
+        rows = self._rows(_RACE_SELECT + " WHERE r.id=?", (_text(race_id, "id"),))
+        if not rows:
+            raise KeyError(race_id)
+        race = rows[0]
         race["status"] = "scored" if race["revision"] else "pending"
         race["icon_url"] = icon_url(race["course"])
         race["placements"] = self._rows(
@@ -489,9 +491,8 @@ class TrackerStore:
         """Hydrate an ordered race collection in four queries, not per race."""
         where = " WHERE r.session_id=?" if session_id is not None else ""
         values = (session_id,) if session_id is not None else ()
-        races = self._rows("""SELECT r.*, first.rowid AS confirmed_order FROM races r
-            LEFT JOIN result_revisions first ON first.race_id=r.id AND first.revision=1"""
-            + where + " ORDER BY r.rowid", values)
+        races = self._rows(_RACE_SELECT + " JOIN sessions s ON s.id=r.session_id"
+                           + where + " ORDER BY s.rowid,r.history_order,r.rowid", values)
         by_id = {race['id']: race for race in races}
         for race in races:
             race.update(status="scored" if race['revision'] else "pending", icon_url=icon_url(race['course']),
@@ -644,7 +645,7 @@ class TrackerStore:
         return folder
 
     def reorder_history(self, folder_id, race_ids, expected_ids):
-        """Change only presentation order, never scoring or capture chronology."""
+        """Save the race sequence without rewriting results or recording timestamps."""
         with self._transaction():
             owner = self._folder(folder_id)['session_id']
             ids = [r['id'] for r in self._rows(

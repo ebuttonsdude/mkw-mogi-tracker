@@ -44,10 +44,10 @@ class WWSnapshotReadTests(unittest.TestCase):
         first, second = self.mixed_history()
 
         def assert_equivalent():
-            ids = [row['id'] for row in self.store._rows('SELECT id FROM races ORDER BY rowid')]
-            expected = [self.store._race(identifier) for identifier in ids]
+            expected = [self.store._race(row['id']) for row in self.store._rows(
+                'SELECT id FROM races ORDER BY history_order,rowid')]
             with patch.object(self.store, '_race', side_effect=AssertionError('per-race hydration')):
-                self.assertEqual(self.store._races(), expected)
+                self.assertCountEqual(self.store._races(), expected)
                 for owner in (first, second):
                     self.assertEqual(self.store._races(owner['id']),
                                      [race for race in expected if race['session_id'] == owner['id']])
@@ -77,7 +77,7 @@ class WWSnapshotReadTests(unittest.TestCase):
         expected['all_courses'] = ww_course_stats(races)
         with patch.object(self.store, '_race', side_effect=AssertionError('per-race hydration')):
             snapshot = self.store.snapshot()
-        self.assertEqual(snapshot['races'], races)
+        self.assertCountEqual(snapshot['races'], races)
         self.assertEqual(snapshot['ww'], expected)
         self.assertEqual(snapshot['ww_player_names'], {
             snapshot['sessions'][0]['id']: '最初のプレイヤー', current['id']: 'Second player'})

@@ -125,7 +125,7 @@ You can cancel an import. Results already found remain available to review.
 
 Open **Race history** and expand the session folder. **Collapse all** closes every session in the current tracker mode, including sessions hidden by the filter. Folder expansion is remembered in this browser; collapsing does not discard an open editor’s unsaved text.
 
-If a race was entered out of sequence, choose **Race order (editable)**. Drag its handle onto the row it should occupy, or choose **Move up** or **Move down**. This saves the order inside that folder; it does not edit timestamps, placements, points or VR.
+If a race was entered out of sequence, choose **Race order (editable)**. Drag its handle onto the row it should occupy, or choose **Move up** or **Move down**. The next PNG preview or download uses the saved sequence, from race 1 onward. Mogi charts and placement columns follow it; Worldwides graphs, recent-race stats and live VR changes calculated from the preceding recorded race do too. Moving a race does not edit its finishing positions, observed VR or recording timestamps.
 
 - Use the race's result editor to correct the finishing order. Saving replaces the old score; it does not score the race twice.
 - Use **Edit course / chapter** to fix a course name or timestamp.

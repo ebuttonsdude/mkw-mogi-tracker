@@ -487,7 +487,6 @@ function renderHistory() {
   const folderId = $('history-folder').value;
   const key = $('history-sort').value;
   const direction = $('history-direction').value === 'asc' ? 1 : -1;
-  const insertionOrder = new Map(state.races.map((race, index) => [race.id, index]));
   const races = state.races.filter((race) => !folderId || same(race.folder_id, folderId));
   races.sort((a, b) => {
     let comparison;
@@ -496,7 +495,7 @@ function renderHistory() {
     else if (key === 'offset_ms') {
       if (a.offset_ms == null || b.offset_ms == null) return Number(a.offset_ms == null) - Number(b.offset_ms == null);
       comparison = a.offset_ms - b.offset_ms;
-    } else comparison = String(a.created_at || '').localeCompare(String(b.created_at || '')) || insertionOrder.get(a.id) - insertionOrder.get(b.id);
+    } else comparison = String(a.created_at || '').localeCompare(String(b.created_at || '')) || a.entry_order - b.entry_order;
     return direction * comparison;
   });
   const groups = [...(state.folders || [])].sort((a, b) =>
@@ -712,14 +711,13 @@ function renderWWHistory() {
       `/api/folders/${encodeURIComponent(folder.id)}/report.png`, `ww-folder-${folder.id}.png`, 'WW PNG export failed')));
     group.append(controls);
     const races = state.races.filter(race => same(race.folder_id, folder.id));
-    const order = new Map(races.map((race, index) => [race.id, index]));
     races.sort((a, b) => {
       if (key === 'history_order') return direction * (a.history_order - b.history_order);
       if (key === 'offset_ms') {
         if (a.offset_ms == null || b.offset_ms == null) return Number(a.offset_ms == null) - Number(b.offset_ms == null);
         return direction * (a.offset_ms - b.offset_ms);
       }
-      return direction * (String(a[key] || '').localeCompare(String(b[key] || '')) || order.get(a.id) - order.get(b.id));
+      return direction * (String(a[key] || '').localeCompare(String(b[key] || '')) || a.entry_order - b.entry_order);
     });
     const [historyTable, body] = table(['Course / chapter', 'Position', 'Final VR', 'VR change', 'Result']);
     races.forEach(race => {

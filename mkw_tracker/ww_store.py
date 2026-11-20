@@ -182,8 +182,8 @@ class WWStore(TrackerStore):
             if result["derive_from_previous"] and result["source"] == "capture":
                 previous = self._rows("""SELECT result.vr_after FROM races AS previous
                     JOIN ww_results AS result ON result.race_id=previous.id AND result.revision=previous.revision
-                    WHERE previous.session_id=? AND previous.rowid < (SELECT rowid FROM races WHERE id=?)
-                    ORDER BY previous.rowid DESC LIMIT 1""", (race["session_id"], race["id"]))
+                    WHERE previous.session_id=? AND previous.history_order < ?
+                    ORDER BY previous.history_order DESC LIMIT 1""", (race["session_id"], race["history_order"]))
                 if previous:
                     # Final VR is observed, so this is one lookup, never a
                     # recursive chain. Corrections/deletions update the view.
@@ -193,11 +193,11 @@ class WWStore(TrackerStore):
         return race
 
     def _ww_races(self, session_id=None):
-        """Read latest observations in input order without hydrating evidence."""
+        """Read latest observations in saved race order without hydrating evidence."""
         where = " WHERE race.session_id=?" if session_id is not None else ""
         rows = self._rows("""SELECT result.*, race.session_id AS owner, race.course AS course
             FROM races AS race JOIN ww_results AS result
-            ON result.race_id=race.id AND result.revision=race.revision""" + where + " ORDER BY race.rowid",
+            ON result.race_id=race.id AND result.revision=race.revision""" + where + " ORDER BY race.history_order,race.rowid",
             (session_id,) if session_id is not None else ())
         previous = {}
         races = []

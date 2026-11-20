@@ -65,6 +65,8 @@ class OverlayMovementTests(unittest.TestCase):
         before = self.teams_by_id()
         self.app.store.create_race('pending', 'Peach Stadium')
         self.app.store.update_race('second', 'Crown City')
+        self.app.store.reorder_history(self.app.store.active_session()['folder_id'],
+                                       ['pending', 'second', 'first'], ['first', 'second', 'pending'])
         self.assertEqual(self.teams_by_id(), before)
         self.assertEqual(self.teams_by_id(), before)
 
