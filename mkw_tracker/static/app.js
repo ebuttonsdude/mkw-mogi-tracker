@@ -537,9 +537,9 @@ function modeText(id, worldwide, ffa) {
   if (!mogiCopy.has(id)) mogiCopy.set(id, node.textContent);
   node.textContent = state.tracker_mode === 'ww' ? worldwide : state.tracker_mode === 'ffa' && ffa ? ffa : mogiCopy.get(id);
 }
-function renderTrackerMode() {
-  const ww = state.tracker_mode === 'ww';
-  document.body.dataset.trackerMode = state.tracker_mode || 'mogi';
+let switchingMode = false;
+function renderModeControl() {
+  if (switchingMode) return;
   $('tracker-mode').value = state.tracker_mode || 'mogi';
   const blocked = Boolean(state.mode_switch_warning);
   $('tracker-mode').disabled = blocked;
@@ -550,6 +550,11 @@ function renderTrackerMode() {
     button.textContent = $('tracker-mode').selectedOptions[0].textContent;
     button.setAttribute('aria-label', `Tracker mode: ${button.textContent}. Show why switching is unavailable.`);
   }
+}
+function renderTrackerMode() {
+  const ww = state.tracker_mode === 'ww';
+  document.body.dataset.trackerMode = state.tracker_mode || 'mogi';
+  renderModeControl();
   modeText('product-description', 'Personal VR · Worldwides · Recording chapters', 'Mogi FFA · Individual scores · Recording chapters');
   modeText('player-help', '', 'Twelve individual players. Rename a player without losing their history.');
   modeText('penalty-help', '', 'Penalties deduct points from a player. Only participants in this race are eligible.');
@@ -849,6 +854,7 @@ async function refresh(background = false) {
     state = next;
     // Keep progress moving while a focused input or editor protects its draft.
     if (background && !canRedraw()) {
+      renderModeControl();
       renderImports(false);
       $('capture').textContent = captureStatus();
     } else render();
@@ -1497,7 +1503,7 @@ $('capture-mode').addEventListener('change', (event) => {
   event.target.dataset.dirty = 'true'; renderCameras(state?.cameras);
 });
 $('obs-source').addEventListener('input', (event) => { event.target.dataset.dirty = 'true'; });
-$('tracker-mode').addEventListener('change', () => run($('tracker-mode'), async () => {
+async function switchMode() {
   const target = $('tracker-mode').value;
   if (wwEditing || editing || timingEditing || document.querySelector('form[data-draft-started]')) {
     if (!window.confirm('Switch tracker mode and discard unfinished editors and entries? Saved results are kept.')) {
@@ -1513,11 +1519,14 @@ $('tracker-mode').addEventListener('change', () => run($('tracker-mode'), async 
     message(`Switched to ${target === 'ww' ? 'Worldwides' : target === 'ffa' ? 'Mogi FFA' : 'Mogi Teams'}. Sessions remain separate.`);
   } catch (error) {
     $('tracker-mode').value = state.tracker_mode || 'mogi';
-    if (error.message.endsWith('before switching tracker modes.')) {
-      showModeSwitchWarning(error.message, $('tracker-mode'));
-    } else { throw error; }
+    showModeSwitchWarning(error.message, $('tracker-mode'));
   }
-}));
+}
+$('tracker-mode').addEventListener('change', async () => {
+  switchingMode = true;
+  try { await run($('tracker-mode'), switchMode); }
+  finally { switchingMode = false; renderModeControl(); }
+});
 $('ww-stats-scope').addEventListener('change', renderWW);
 $('ww-player').addEventListener('input', () => { $('ww-player').dataset.draftStarted = 'true'; });
 submit('ww-player', async (form, data) => {

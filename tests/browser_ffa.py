@@ -49,7 +49,10 @@ def main():
 
                 # Simulate an owned, active CLI capture without starting hardware.
                 with patch.object(app.capture, 'thread', Mock(is_alive=lambda: True)):
-                    page.locator('#refresh').click()
+                    # A focused field suppresses full redraws, not capture-lock updates.
+                    page.locator('#auto-refresh').check()
+                    page.locator('#auto-refresh').focus()
+                    page.evaluate('refresh(true)')
                     blocked = page.locator('#blocked-tracker-mode')
                     expect(blocked).to_be_visible()
                     blocked.click(position={'x': 6, 'y': 6})
@@ -67,8 +70,10 @@ def main():
                     expect(warning).to_be_visible()
                     blocked.press('Escape')
                     expect(warning).to_be_hidden()
-                page.locator('#refresh').click()
+                page.locator('#auto-refresh').focus()
+                page.evaluate('refresh(true)')
                 expect(page.locator('#tracker-mode')).to_be_enabled()
+                page.locator('#auto-refresh').uncheck()
                 switch_mode('ffa')
                 page.locator('#tab-standings').click()
                 expect(page.locator('#team-section')).to_be_hidden()
