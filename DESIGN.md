@@ -60,6 +60,8 @@ The dashboard has seven tabs. Desktop tabs form a left navigation column; only t
 
 The browser remembers the selected tab and folder expansion. Opening an editor selects Race history. History defaults to newest-created folders and supports filtering and race sorting. Each folder is a scoring session, not a container for moving races between sessions. Collapse all closes every folder in the current mode, including filtered-out folders, persists expansion state and preserves unsaved editor input.
 
+Race order is a saved, per-folder display order shared by Mogi and WW history views. Dragging a handle onto a row takes its position; native move buttons provide a keyboard/touch alternative. Other sort modes do not change saved order or expose reorder controls.
+
 Settings keeps themes and course pictures first; Overlays owns source, display, OBS text output and browser overlay controls. Overlay & PNG font, Session backups and Experimental use native disclosures closed by default; user-opened panels survive polling. External vision endpoint lives inside Experimental. Capture/import name-reader guidance is collapsible. NVFP4 hardware reminder dismissal is per browser and model; guidance retains the warning and setup/runtime errors remain visible.
 
 ### Scoring and session rules

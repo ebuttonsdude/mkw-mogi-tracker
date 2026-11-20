@@ -38,7 +38,7 @@ TABLES = {
     'teams': 'id name active color session_id',
     'players': 'id name team_id active session_id',
     'recordings': 'id label started_at',
-    'races': 'id session_id course recording_id offset_ms revision folder_id created_at auto_confirmed',
+    'races': 'id session_id course recording_id offset_ms revision folder_id created_at auto_confirmed history_order',
     'result_revisions': 'race_id revision created_at',
     'placements': 'race_id revision player_id position',
     'penalties': 'id race_id player_id points reason created_at',
@@ -122,7 +122,8 @@ def collect(store, selected=None, mode='mogi', schema='main', *, archive_limits=
         rows, total_bytes, count = {}, 0, 0
         race_columns = {row[1] for row in store._db.execute(f'PRAGMA {schema}.table_info(races)')}
         for table, columns in tables(mode).items():
-            selected_columns = [c if c != 'auto_confirmed' or c in race_columns else '0 AS auto_confirmed'
+            fallback = {'auto_confirmed': '0 AS auto_confirmed', 'history_order': 'rowid AS history_order'}
+            selected_columns = [fallback.get(c, c) if table == 'races' and c not in race_columns else c
                                 for c in columns.split()]
             condition = conditions.get(table, f'race_id IN ({race_query})')
             cursor = store._db.execute(
@@ -176,14 +177,15 @@ def validate(payload, *, archive_limits=True):
         for table, columns in tables(mode).items():
             if not isinstance(rows[table], list) or (archive_limits and len(rows[table]) > 100000):
                 raise ValueError('Invalid or oversized session table')
-            for row in rows[table]:
+            for index, row in enumerate(rows[table], start=1):
                 if table == 'races' and isinstance(row, dict):
+                    row.setdefault('history_order', index)  # Older archives retain insertion order.
                     row.setdefault('auto_confirmed', 0)  # Version 1 archives before YOLO provenance.
                 if not isinstance(row, dict) or set(row) != set(columns.split()):
                     raise ValueError('Unexpected session fields')
                 for key, value in row.items():
                     integer = key in {'active', 'offset_ms', 'revision', 'position', 'points',
-                                      'lobby_size', 'vr_before', 'vr_after', 'delta', 'derive_from_previous', 'auto_confirmed'}
+                                      'lobby_size', 'vr_before', 'vr_after', 'delta', 'derive_from_previous', 'auto_confirmed', 'history_order'}
                     optional = key in {'team_id', 'recording_id', 'offset_ms', 'color', 'lounge_id',
                                        'lobby_size', 'vr_before', 'delta'}
                     if value is None and not optional:
@@ -244,7 +246,12 @@ def _validate_rows(check, mode, rows):
             if revision['revision'] < 1:
                 raise ValueError('Result revisions start at one')
             revisions_by_race.setdefault(revision['race_id'], []).append(revision['revision'])
+        seen_order = set()
         for race in races.values():
+            slot = (race['session_id'], race['history_order'])
+            if not 0 < race['history_order'] < 2**63 - 1 or slot in seen_order:
+                raise ValueError('Invalid race history order')
+            seen_order.add(slot)
             if race['folder_id'] != sessions[race['session_id']]['folder_id']:
                 raise ValueError('Cross-session race folder')
             revisions = revisions_by_race.get(race['id'], [])
