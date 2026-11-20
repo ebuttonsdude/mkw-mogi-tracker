@@ -5,6 +5,7 @@ PLAYWRIGHT_BROWSERS_PATH=.local/browsers .venv/bin/python -m tests.browser_ffa
 from pathlib import Path
 import tempfile
 import threading
+from unittest.mock import Mock, patch
 
 from mkw_tracker.server import Application, make_server
 
@@ -46,6 +47,33 @@ def main():
                                             'selected: document.querySelector("#tracker-mode").value})'))
                         raise
 
+                # Simulate an owned, active CLI capture without starting hardware.
+                with patch.object(app.capture, 'thread', Mock(is_alive=lambda: True)):
+                    # A focused field suppresses full redraws, not capture-lock updates.
+                    page.locator('#auto-refresh').check()
+                    page.locator('#auto-refresh').focus()
+                    page.evaluate('refresh(true)')
+                    blocked = page.locator('#blocked-tracker-mode')
+                    expect(blocked).to_be_visible()
+                    blocked.click(position={'x': 6, 'y': 6})
+                    warning = page.locator('#mode-switch-warning')
+                    expect(warning).to_have_text('Stop capture before switching tracker modes.')
+                    expect(warning).to_be_visible()
+                    button_box, notice_box = blocked.bounding_box(), warning.bounding_box()
+                    assert abs(notice_box['x'] - button_box['x']) <= notice_box['width']
+                    assert abs(notice_box['y'] - button_box['y']) < button_box['height']
+                    expect(page.locator('body')).to_have_attribute('data-tracker-mode', 'mogi')
+                    page.locator('h1').click()
+                    expect(warning).to_be_hidden()
+                    blocked.focus()
+                    blocked.press('Enter')
+                    expect(warning).to_be_visible()
+                    blocked.press('Escape')
+                    expect(warning).to_be_hidden()
+                page.locator('#auto-refresh').focus()
+                page.evaluate('refresh(true)')
+                expect(page.locator('#tracker-mode')).to_be_enabled()
+                page.locator('#auto-refresh').uncheck()
                 switch_mode('ffa')
                 page.locator('#tab-standings').click()
                 expect(page.locator('#team-section')).to_be_hidden()

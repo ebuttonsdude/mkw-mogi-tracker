@@ -107,7 +107,7 @@ Course names, evidence, recording-relative timing and chapter correction/export 
 
 ## Mogi FFA
 
-Mogi FFA is a separate UI choice alongside Mogi Teams and Worldwides. It reuses Mogi scoring, capture/import, confirmation, correction and penalty logic rather than creating synthetic teams. FFA has its own saved data context and history under `ffa/`, with a persisted session format. Switching modes resumes that mode's session; existing team sessions are never converted.
+Mogi FFA is a separate UI choice alongside Mogi Teams and Worldwides. It reuses Mogi scoring, capture/import, confirmation, correction and penalty logic rather than creating synthetic teams. FFA has its own saved data context and history under `ffa/`, with a persisted session format. Switching modes resumes that mode's session; existing team sessions are never converted. While capture is active, the mode control explains the lock in a red notice beside the pointer (or control for keyboard users); clicking elsewhere or pressing Escape dismisses it.
 
 FFA requires twelve distinct finishers and the same 82 points per race. Capture results remain pending until explicitly confirmed. Team creation, assignments and name-initial bootstrap are unavailable. The dashboard, OBS overlay, folder PNG and text/Markdown exports present individual players, with Unicode-capable names, player-ID highlighting, net points and gaps. Player charts replace team charts in FFA PNGs. The shared OBS overlay URL follows the active mode, retaining transparency, reduced motion and last-good state.
 

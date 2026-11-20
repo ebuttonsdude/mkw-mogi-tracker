@@ -537,11 +537,24 @@ function modeText(id, worldwide, ffa) {
   if (!mogiCopy.has(id)) mogiCopy.set(id, node.textContent);
   node.textContent = state.tracker_mode === 'ww' ? worldwide : state.tracker_mode === 'ffa' && ffa ? ffa : mogiCopy.get(id);
 }
+let switchingMode = false;
+function renderModeControl() {
+  if (switchingMode) return;
+  $('tracker-mode').value = state.tracker_mode || 'mogi';
+  const blocked = Boolean(state.mode_switch_warning);
+  $('tracker-mode').disabled = blocked;
+  $('tracker-mode').hidden = blocked;
+  const button = $('blocked-tracker-mode');
+  button.hidden = !blocked;
+  if (blocked) {
+    button.textContent = $('tracker-mode').selectedOptions[0].textContent;
+    button.setAttribute('aria-label', `Tracker mode: ${button.textContent}. Show why switching is unavailable.`);
+  }
+}
 function renderTrackerMode() {
   const ww = state.tracker_mode === 'ww';
   document.body.dataset.trackerMode = state.tracker_mode || 'mogi';
-  $('tracker-mode').value = state.tracker_mode || 'mogi';
-  $('tracker-mode').disabled = Boolean(state.cameras?.status?.busy || state.imports?.active);
+  renderModeControl();
   modeText('product-description', 'Personal VR · Worldwides · Recording chapters', 'Mogi FFA · Individual scores · Recording chapters');
   modeText('player-help', '', 'Twelve individual players. Rename a player without losing their history.');
   modeText('penalty-help', '', 'Penalties deduct points from a player. Only participants in this race are eligible.');
@@ -841,6 +854,7 @@ async function refresh(background = false) {
     state = next;
     // Keep progress moving while a focused input or editor protects its draft.
     if (background && !canRedraw()) {
+      renderModeControl();
       renderImports(false);
       $('capture').textContent = captureStatus();
     } else render();
@@ -1237,6 +1251,23 @@ async function mutateTheme(operation) {
 }
 $('custom-theme-form').addEventListener('input', () => { ++themeDraftGeneration; });
 $('character-theme').addEventListener('change', () => { ++themeDraftGeneration; });
+function showModeSwitchWarning(text, anchor, event) {
+  const warning = $('mode-switch-warning');
+  warning.textContent = text;
+  warning.hidden = false;
+  const rect = anchor.getBoundingClientRect();
+  const x = event?.detail ? event.clientX : rect.left;
+  const y = event?.detail ? event.clientY : rect.bottom;
+  warning.style.left = Math.max(8, Math.min(x + 10, innerWidth - warning.offsetWidth - 8)) + 'px';
+  warning.style.top = Math.max(8, Math.min(y + 10, innerHeight - warning.offsetHeight - 8)) + 'px';
+}
+document.addEventListener('click', () => { $('mode-switch-warning').hidden = true; }, true);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape') $('mode-switch-warning').hidden = true;
+});
+$('blocked-tracker-mode').addEventListener('click', event => {
+  showModeSwitchWarning(state.mode_switch_warning, event.currentTarget, event);
+});
 $('tracker-mode').addEventListener('change', () => { ++themeDraftGeneration; });
 function themeDraftStatus(text) { $('theme-editor-status').textContent = text; }
 function clearThemeImagePreview() {
@@ -1472,7 +1503,7 @@ $('capture-mode').addEventListener('change', (event) => {
   event.target.dataset.dirty = 'true'; renderCameras(state?.cameras);
 });
 $('obs-source').addEventListener('input', (event) => { event.target.dataset.dirty = 'true'; });
-$('tracker-mode').addEventListener('change', () => run($('tracker-mode'), async () => {
+async function switchMode() {
   const target = $('tracker-mode').value;
   if (wwEditing || editing || timingEditing || document.querySelector('form[data-draft-started]')) {
     if (!window.confirm('Switch tracker mode and discard unfinished editors and entries? Saved results are kept.')) {
@@ -1486,8 +1517,16 @@ $('tracker-mode').addEventListener('change', () => run($('tracker-mode'), async 
     $('history-folder').value = ''; $('import-folder').value = ''; settingsSignature = '';
     await refresh();
     message(`Switched to ${target === 'ww' ? 'Worldwides' : target === 'ffa' ? 'Mogi FFA' : 'Mogi Teams'}. Sessions remain separate.`);
-  } catch (error) { $('tracker-mode').value = state.tracker_mode || 'mogi'; throw error; }
-}));
+  } catch (error) {
+    $('tracker-mode').value = state.tracker_mode || 'mogi';
+    showModeSwitchWarning(error.message, $('tracker-mode'));
+  }
+}
+$('tracker-mode').addEventListener('change', async () => {
+  switchingMode = true;
+  try { await run($('tracker-mode'), switchMode); }
+  finally { switchingMode = false; renderModeControl(); }
+});
 $('ww-stats-scope').addEventListener('change', renderWW);
 $('ww-player').addEventListener('input', () => { $('ww-player').dataset.draftStarted = 'true'; });
 submit('ww-player', async (form, data) => {
