@@ -8,6 +8,7 @@ import json
 import math
 import threading
 import time
+from fractions import Fraction
 from urllib.parse import urlsplit
 from uuid import uuid4
 
@@ -89,6 +90,8 @@ class ObsClient:
         with self._lock:
             connection, self._socket = self._socket, None
             self._events.clear()
+            self._read_fps = False
+            self._recording_fps = None
             if connection is not None:
                 log_event('obs', 'closed')
                 try:
@@ -154,6 +157,8 @@ class ObsClient:
                             self.close()
                             raise ObsError('OBS recording event queue overflowed')
                         self._events.append(message)
+                        if message.get('eventData', {}).get('outputState') == 'OBS_WEBSOCKET_OUTPUT_STARTED':
+                            self._read_fps = False
                     continue
                 if (op != 7 or message.get('requestId') != request_id
                         or message.get('requestType') != request_type):
@@ -207,4 +212,24 @@ class ObsClient:
                 or type(duration) not in (int, float) or not math.isfinite(duration) or duration < 0
                 or not isinstance(response.get('outputTimecode'), str)):
             raise ObsError('OBS returned invalid recording status')
+        if not response['outputActive']:
+            self._read_fps = False
+            self._recording_fps = None
+        elif not self._read_fps:
+            # GetRecordStatus has no frame rate. Sample configured video settings
+            # once per recording, not once per screenshot or at export time.
+            self._read_fps = True
+            self._recording_fps = None
+            try:
+                settings = self.request('GetVideoSettings')
+            except ObsError:
+                # Unsupported optional metadata must not suppress a valid clock.
+                if self._socket is None:
+                    raise
+                settings = {}
+            numerator, denominator = settings.get('fpsNumerator'), settings.get('fpsDenominator')
+            if all(type(n) is int and 0 < n <= 2**32 - 1 for n in (numerator, denominator)):
+                self._recording_fps = str(Fraction(numerator, denominator))
+        if self._recording_fps is not None:
+            response['recordingFps'] = self._recording_fps
         return response

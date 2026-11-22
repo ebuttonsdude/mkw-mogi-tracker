@@ -22,7 +22,7 @@ from uuid import uuid4
 import zipfile
 import zlib
 
-from .store import TrackerStore
+from .store import TrackerStore, validate_recording_fps
 from .ww_store import WWStore
 
 FORMAT = 'mkw-session-backup'
@@ -37,7 +37,7 @@ TABLES = {
     'sessions': 'id started_at folder_id format',
     'teams': 'id name active color session_id',
     'players': 'id name team_id active session_id',
-    'recordings': 'id label started_at',
+    'recordings': 'id label started_at fps',
     'races': 'id session_id course recording_id offset_ms revision folder_id created_at auto_confirmed history_order',
     'result_revisions': 'race_id revision created_at',
     'placements': 'race_id revision player_id position',
@@ -121,10 +121,13 @@ def collect(store, selected=None, mode='mogi', schema='main', *, archive_limits=
         }
         rows, total_bytes, count = {}, 0, 0
         race_columns = {row[1] for row in store._db.execute(f'PRAGMA {schema}.table_info(races)')}
+        recording_columns = {row[1] for row in store._db.execute(f'PRAGMA {schema}.table_info(recordings)')}
         for table, columns in tables(mode).items():
             fallback = {'auto_confirmed': '0 AS auto_confirmed', 'history_order': 'rowid AS history_order'}
             selected_columns = [fallback.get(c, c) if table == 'races' and c not in race_columns else c
                                 for c in columns.split()]
+            if table == 'recordings' and 'fps' not in recording_columns:
+                selected_columns[selected_columns.index('fps')] = 'NULL AS fps'
             condition = conditions.get(table, f'race_id IN ({race_query})')
             cursor = store._db.execute(
                 f'SELECT {",".join(selected_columns)} FROM {schema}.{table} WHERE {condition} ORDER BY rowid', values)
@@ -178,6 +181,8 @@ def validate(payload, *, archive_limits=True):
             if not isinstance(rows[table], list) or (archive_limits and len(rows[table]) > 100000):
                 raise ValueError('Invalid or oversized session table')
             for index, row in enumerate(rows[table], start=1):
+                if table == 'recordings' and isinstance(row, dict):
+                    row.setdefault('fps', None)  # Not collected in older archives.
                 if table == 'races' and isinstance(row, dict):
                     row.setdefault('history_order', index)  # Older archives retain insertion order.
                     row.setdefault('auto_confirmed', 0)  # Version 1 archives before YOLO provenance.
@@ -186,7 +191,7 @@ def validate(payload, *, archive_limits=True):
                 for key, value in row.items():
                     integer = key in {'active', 'offset_ms', 'revision', 'position', 'points',
                                       'lobby_size', 'vr_before', 'vr_after', 'delta', 'derive_from_previous', 'auto_confirmed', 'history_order'}
-                    optional = key in {'team_id', 'recording_id', 'offset_ms', 'color', 'lounge_id',
+                    optional = key in {'fps', 'team_id', 'recording_id', 'offset_ms', 'color', 'lounge_id',
                                        'lobby_size', 'vr_before', 'delta'}
                     if value is None and not optional:
                         raise ValueError('Missing required session value')
@@ -194,6 +199,8 @@ def validate(payload, *, archive_limits=True):
                         raise ValueError('Invalid session field type')
                     if integer and value is not None and not -(2**63) < value < 2**63:
                         raise ValueError('Session integer is out of range')
+                    if key == 'fps':
+                        validate_recording_fps(value)
                     if key in ('active', 'derive_from_previous', 'auto_confirmed') and value not in (0, 1):
                         raise ValueError('Invalid boolean session value')
                     if value is not None and type(value) not in (str, int):

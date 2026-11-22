@@ -88,7 +88,7 @@ class ObsTests(unittest.TestCase):
                   'outputDuration': 1234, 'outputTimecode': '00:00:01.234'}
         client, connection = self.client(
             packet(5, **events[0]), packet(5, eventType='StreamStateChanged', eventData={}),
-            packet(5, **events[1]), response(status), response({'sources': []}))
+            packet(5, **events[1]), response(status), response({}), response({'sources': []}))
         self.assertEqual(client.record_status(), status)
         self.assertEqual(client.drain_events(), events)
         self.assertEqual(client.drain_events(), [])
@@ -97,6 +97,23 @@ class ObsTests(unittest.TestCase):
         self.assertEqual(requests[0]['d']['requestType'], 'GetRecordStatus')
         self.assertNotEqual(requests[0]['d']['requestId'], requests[1]['d']['requestId'])
         self.assertNotIn('authentication', connection.sent[0]['d'])
+
+    def test_recording_rate_is_exact_and_sampled_per_recording(self):
+        active = {'outputActive': True, 'outputPaused': False,
+                  'outputDuration': 1234, 'outputTimecode': '00:00:01.234'}
+        restart = packet(5, eventType='RecordStateChanged', eventData={
+            'outputState': 'OBS_WEBSOCKET_OUTPUT_STARTED'})
+        client, connection = self.client(
+            response(active), response({'fpsNumerator': 60000, 'fpsDenominator': 1001}),
+            response(active), restart, response(active), response({'fpsNumerator': 120, 'fpsDenominator': 2}),
+            response({**active, 'outputActive': False}), response(active), response(success=False))
+        self.assertEqual(client.record_status()['recordingFps'], '60000/1001')
+        self.assertEqual(client.record_status()['recordingFps'], '60000/1001')
+        self.assertEqual(client.record_status()['recordingFps'], '60')
+        self.assertNotIn('recordingFps', client.record_status())
+        self.assertNotIn('recordingFps', client.record_status())
+        self.assertEqual(sum(msg['d'].get('requestType') == 'GetVideoSettings'
+                             for msg in connection.sent), 3)
 
     def test_server_error_preserves_connection_and_hides_secrets(self):
         client, connection = self.client(

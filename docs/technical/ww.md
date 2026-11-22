@@ -48,4 +48,4 @@ Lobby size is no longer shown or requested in the WW dashboard. Existing saved c
 
 ## Chapters
 
-Course names and recording-relative timestamps remain editable. For imported recordings, timestamps refer to the imported file, including its cuts. Without a verified OBS recording clock, offsets remain unknown rather than using elapsed capture time. Chapters export only known offsets. Inspect the recording before relying on a marker for editing.
+Course names and recording-relative timestamps remain editable. For imported recordings, timestamps refer to the imported file, including its cuts. Without a verified OBS recording clock, offsets remain unknown rather than using elapsed capture time. In **Timestamps**, TXT exports known offsets; Resolve EDL requires a timestamp for every race linked to that recording. Inspect the recording before relying on a marker for editing.

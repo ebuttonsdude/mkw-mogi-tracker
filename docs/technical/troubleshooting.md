@@ -43,7 +43,7 @@ Correct the reviewed name and select the intended existing player. Only a unique
 
 ## Recording offsets are blank or wrong
 
-Start clock-enabled capture before starting the OBS recording. Camera images alone have no recording clock. Connecting midway, connection changes, or file splits can leave timing unverified. Correct the recording and offset in **Edit course / chapter**. Unknown offsets are omitted from chapter downloads. See [chapter exports](user-guide.md#automatic-timestamp-creation).
+Start clock-enabled capture before starting the OBS recording. Camera images alone have no recording clock. Connecting midway, connection changes, or file splits can leave timing unverified. Correct the recording and offset in **Edit course / chapter**. Unknown offsets are omitted from TXT. Correct them before downloading Resolve markers; the EDL export will identify a race that needs attention. See [chapter exports](user-guide.md#automatic-timestamp-creation).
 
 ## Imports or capture are blocked
 

@@ -71,6 +71,13 @@ class ImportTests(unittest.TestCase):
         self.assertFalse(self.manager.thread.is_alive())
         return self.manager.snapshot()['jobs'][0]
 
+    def test_recording_retains_decoder_rate_without_rounding(self):
+        self.video.fps = 59.94
+        self.manager.start(str(self.video_path))
+        job = self.wait()
+        self.assertEqual(job['status'], 'completed', job['error'])
+        self.assertEqual(self.store.get_recording(job['recording_id'])['fps'], '59.94')
+
     def test_video_open_decode_and_release_have_one_worker_owner(self):
         owners = []
 

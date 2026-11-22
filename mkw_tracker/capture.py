@@ -58,7 +58,7 @@ class RecordingClock:
         rollback = self.last_duration is not None and duration < self.last_duration
         if not self.active or split or rollback or started:
             label = "OBS " + datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-            self.recording_id = self.store.create_recording(label)["id"]
+            self.recording_id = self.store.create_recording(label, fps=status.get("recordingFps"))["id"]
             self.valid = (self.saw_inactive or started) and not split and (not rollback or started)
             if split or rollback:
                 self.message = "Recording file/clock changed; verify file-local chapter offsets."

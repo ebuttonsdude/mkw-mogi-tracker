@@ -56,7 +56,7 @@ For the most reliable starting point:
 2. Wait for the connected status.
 3. Start recording in OBS.
 4. After your session, check the course times in **Race history**.
-5. Export them from **Chapters**.
+5. Export them from **Timestamps**.
 
 The tracker does not start or stop your OBS recording. If it cannot verify a recording time, the time stays blank. You can fill it in later.
 

@@ -27,7 +27,7 @@ def populate(root, mode='mogi'):
     directory.mkdir(parents=True, exist_ok=True)
     store = WWStore(directory / 'tracker.sqlite3') if mode == 'ww' else TrackerStore(directory / 'tracker.sqlite3')
     session = store.active_session()['id']
-    recording = store.create_recording('Recording 選手')
+    recording = store.create_recording('Recording 選手', fps='60000/1001')
     store.create_race('same-race-id', 'Course', recording['id'], 1200)
     if mode == 'ww':
         store.set_player_name('選手', session)
@@ -91,16 +91,20 @@ class TransfersTests(unittest.TestCase):
                 self.assertEqual(store._rows('SELECT * FROM races WHERE id="same-race-id"')[0]['revision'], 2)
                 self.assertEqual(store._rows('SELECT DISTINCT history_order FROM races WHERE revision=0'),
                                  [{'history_order': 1}])
+                self.assertEqual(store._rows('SELECT DISTINCT fps FROM recordings'), [{'fps': '60000/1001'}])
                 self.assertFalse(store._rows('PRAGMA foreign_key_check'))
             finally:
                 store.close()
 
     def test_older_archive_without_manual_order_uses_saved_insertion_order(self):
         payload = self.payload()
+        recording = payload['modes']['mogi']['recordings'][0]
+        del recording['fps']
         races = payload['modes']['mogi']['races']
         for race in races:
             del race['history_order']
         transfers.validate(payload)
+        self.assertIsNone(recording['fps'])
         self.assertEqual([r['history_order'] for r in races], [1, 2])
 
     def test_schema_relationships_and_scores_rejected(self):
@@ -108,6 +112,7 @@ class TransfersTests(unittest.TestCase):
         for mutate in (
                 lambda p: p['modes']['mogi']['placements'].pop(),
                 lambda p: p['modes']['mogi']['sessions'][0].update(format='bad'),
+                lambda p: p['modes']['mogi']['recordings'][0].update(fps='60000/0'),
                 lambda p: p['modes']['mogi']['races'][0].update(folder_id='missing'),
                 lambda p: p['modes']['mogi']['players'][0].update(password='secret'),
                 lambda p: p.update(version=2)):

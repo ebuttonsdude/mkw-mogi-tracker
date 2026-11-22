@@ -20,6 +20,7 @@ from uuid import uuid4
 from .diagnostics import log_event
 from .store import TrackerStore
 from .capture import CaptureCoordinator
+from .chapters import format_resolve_edl
 from .cameras import CameraManager
 from .credentials import OBSConnection
 from .external_settings import ExternalVisionSettings
@@ -838,11 +839,19 @@ def make_server(app, port=8765, host="127.0.0.1"):
                     filename = ('ww-results.png' if worldwide else 'room-results.png') if path.endswith('/report.png') else None
                     self._send(200, content, "image/png", filename)
                 elif path == "/api/chapters":
-                    recording_id = parse_qs(parsed.query).get("recording_id", [None])[0]
+                    query = parse_qs(parsed.query, keep_blank_values=True)
+                    recording_id = query.get("recording_id", [None])[0]
+                    export_format = query.get("format", ["txt"])[0]
+                    if export_format not in ("txt", "edl"):
+                        raise ValueError("Choose TXT or EDL as the timestamp format.")
                     with app.lock:
                         races = app.store.recording_chapters(recording_id)
-                    lines = [f"{format_offset(r['offset_ms'])} {r['course']}" for r in races]
-                    self._send(200, ("\n".join(lines) + ("\n" if lines else "")).encode(), "text/plain; charset=utf-8", "race-chapters.txt")
+                    if export_format == "edl":
+                        content = format_resolve_edl(races)
+                    else:
+                        content = "".join(f"{format_offset(r['offset_ms'])} {r['course']}\n"
+                                          for r in races if r['offset_ms'] is not None).encode("utf-8")
+                    self._send(200, content, "text/plain; charset=utf-8", f"race-chapters.{export_format}")
                 elif re.fullmatch(r'/overlay/[a-z0-9-]+', path):
                     with app.lock:
                         app.overlay_profiles.get(path.rsplit('/', 1)[1])

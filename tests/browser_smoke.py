@@ -531,10 +531,11 @@ def main():
                 page.reload()
                 expect(page.locator('#overlay-highlight-team')).to_have_value(teams[0]['id'])
                 assert api('/api/state')['teams'][0]['color'] == '#12abef'
-                tab("Chapters")
+                tab("Timestamps")
                 page.locator("#add-recording input").fill("Browser recording")
                 submit("add-recording", "/api/recordings")
                 recording = api("/api/state")["recordings"][0]
+                expect(page.locator("#export-recording option").nth(1)).to_have_text("Browser recording")
                 tab("Race history")
                 page.locator("#add-race input[name=course]").fill("Rainbow Road")
                 page.locator("#race-recording").select_option(recording["id"])
@@ -618,11 +619,31 @@ def main():
                     page.get_by_role("button", name="Save chapter", exact=True).click()
                 assert response.value.ok
                 expect(page.locator("#timing-panel")).to_be_hidden()
-                tab("Chapters")
+                tab("Timestamps")
                 page.locator("#export-recording").select_option(recording["id"])
+                expect(page.locator("#export-recording option:checked")).to_have_text(snapshot["folders"][0]["name"])
+                expect(page.locator("#export-format")).to_have_value("txt")
+                expect(page.locator("#resolve-help")).to_be_hidden()
                 with page.expect_download() as download:
-                    page.get_by_role("button", name="Download chapters").click()
+                    page.get_by_role("button", name="Download Timestamps").click()
                 assert Path(download.value.path()).read_text(encoding="utf-8") == "00:01:31.007 Corrected chapter\n"
+
+                page.locator("#export-format").select_option("edl")
+                expect(page.locator("#resolve-help")).to_contain_text("Timeline Markers from EDL")
+                expect(page.locator("#recording-fps")).to_have_text("Reported recording rate: unknown.")
+                with app.lock:
+                    app.store.set_recording_fps(recording["id"], "60000/1001")
+                refresh()
+                expect(page.locator("#recording-fps")).to_contain_text("60000/1001 fps (about 59.94 fps)")
+                # Showing source FPS or refreshing chapter data must not request an EDL.
+                assert not page.evaluate("""performance.getEntriesByType('resource').some(entry =>
+                    entry.name.includes('/api/chapters?') && entry.name.includes('format=edl'))""")
+                with page.expect_download() as edl:
+                    page.get_by_role("button", name="Download Timestamps").click()
+                assert edl.value.suggested_filename == "race-chapters.edl"
+                markers = Path(edl.value.path()).read_bytes()
+                assert b"01:01:31:00 01:01:31:01" in markers
+                assert b"|M:Corrected chapter |D:1" in markers
 
                 first_folder_id = snapshot["session"]["folder_id"]
                 first_race_id = snapshot["races"][0]["id"]

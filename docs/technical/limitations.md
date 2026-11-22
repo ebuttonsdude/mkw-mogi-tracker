@@ -29,7 +29,7 @@ See [recognition](recognition.md) for supported frames, model setup, and samplin
 
 Camera input supplies images, not recording timestamps. Enable the OBS recording clock and start capture before recording for automatic recording-relative markers. Connecting midway, losing the clock, or changing recording files can leave offsets unknown. OBS pauses do not advance the chapter clock; automatic file splits require manual file-local verification.
 
-Intro markers are sampled estimates, not frame-accurate edits. Unknown offsets stay blank and are excluded from chapter downloads. Exports are text sidecars, not embedded recording markers or automatic Resolve timeline edits.
+Intro markers are sampled estimates, not frame-accurate edits. TXT omits unknown offsets. EDL requires a timestamp for every linked race, and targets an exact 60 fps non-drop-frame Resolve timeline starting at 01:00:00:00. Neither export embeds markers in a recording.
 
 ## Sessions, history, and evidence
 

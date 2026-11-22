@@ -54,7 +54,7 @@ The dashboard has seven tabs. Desktop tabs form a left navigation column; only t
 | Capture & review | Input/source controls, capture status, session creation, pending race, and screenshot identity reviews |
 | Videos | Local-path/browser imports, progress/cancellation, and uploaded-copy cleanup |
 | Race history | Session folders, load/rename/delete, race creation/correction, evidence, penalties, Lounge links, and PNG actions |
-| Chapters | Recording references, editable intro offsets, and chapter download |
+| Timestamps | Recording references, editable intro offsets, and TXT or DaVinci Resolve EDL download |
 | Overlays | Named sources, Lounge cards, source font, OBS dimensions, text outputs, visibility and live preview |
 | Settings | Character themes, course pictures, shared Overlay & PNG font, backups and Experimental options |
 
@@ -243,7 +243,7 @@ A separate ordinary-review fallback accepts partial finishing tables only with a
 
 Store original pre-race and finishing screenshots. A rejected table-like frame may save at most one suspected-results image for the current known pending race, including across restarts. Require independent table evidence and current ownership; never create a race, review, or inferred placements through this fallback. Prefer later verified results for display. Warn that suspected evidence can be partial or cumulative standings.
 
-Imports overlap ordered recognition with one prefetched decoded frame and one model. The decoder worker owns video operations. Recording-relative timestamps come from a validated OBS clock or imported file, never camera elapsed time. Unknown offsets stay editable and absent from chapter export until corrected.
+Imports overlap ordered recognition with one prefetched decoded frame and one model. The decoder worker owns video operations. Recording-relative timestamps come from a validated OBS clock or imported file, never camera elapsed time. Unknown offsets stay editable. The Timestamps selector labels recordings by their linked session folders, but the download is always scoped to one recording, even when it spans sessions. Generate downloads on request from stored courses and elapsed integer milliseconds in timestamp order. TXT preserves its existing known-offset-only format. EDL requires every linked race to have a safe marker name and valid offset; it never returns a partial file. Its UTF-8, non-drop-frame markers last one frame on an exact 60 fps timeline starting at 01:00:00:00, with elapsed times rounded to the nearest frame (ties up). Display OBS-configured or decoder-reported recording FPS as guidance only; unknown or fractional source rates never silently change the destination timebase.
 
 ### Validation
 

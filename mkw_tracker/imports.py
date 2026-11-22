@@ -6,6 +6,7 @@ import os
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 from uuid import uuid4
 
@@ -182,6 +183,8 @@ class ImportManager:
             if not math.isfinite(duration) or duration <= 0:
                 raise ValueError('The video does not have a usable finite duration.')
             with self.lock:
+                rate = format(Decimal(str(fps)).normalize(), 'f')
+                self.store.set_recording_fps(job['recording_id'], rate)
                 job['duration_seconds'] = duration
                 self._save()
             if not cancelled.is_set():

@@ -45,4 +45,4 @@ Recognition runs locally. Browser uploads copy a recording into the tracker serv
 
 ## Can I import chapters directly into DaVinci Resolve?
 
-The app exports a timestamp/course text sidecar. It does not embed markers in recordings or create Resolve timeline markers automatically. Use the timestamps as references and adjust them after editing the video. See [chapters](user-guide.md#automatic-timestamp-creation).
+Yes. In **Timestamps**, download **DaVinci Resolve markers (.edl)** for an exact 60 fps timeline starting at 01:00:00:00. Open the destination timeline in Resolve. In the Media Pool, right-click it and choose **Timelines > Import > Timeline Markers from EDL**. For a different timeline rate, use the TXT download. See [timestamp export](user-guide.md#automatic-timestamp-creation).

@@ -146,7 +146,14 @@ Follow [Show standings in OBS](obs.md#show-standings-in-obs). It updates as you 
 
 **Video chapters**
 
-Open **Chapters**, choose the recording, and select **Download chapters**. Check the timestamps against the video. Unknown times are left out until you fill them in.
+Open **Timestamps**, select the recording by its session folder name, choose a format, and click **Download Timestamps**. Check the times against the video in **Race history → Edit course / chapter**.
+
+- **Plain text (.txt)** lists known recording-relative times and course names. Unknown times are left out.
+- **DaVinci Resolve markers (.edl)** places one blue, one-frame marker per race on an **exact 60 fps, non-drop-frame timeline starting at 01:00:00:00**. All races linked to the recording need a timestamp. If the download reports an invalid time or a course name containing a pipe or line break, correct it and download again.
+
+The displayed source rate comes from OBS video settings or the imported video's decoder when available. It does not change the EDL timeline rate. If your destination timeline is 59.94 fps or another rate, use TXT instead.
+
+To import the EDL, open the destination timeline in Resolve. In the Media Pool, right-click that timeline and choose **Timelines > Import > Timeline Markers from EDL**.
 
 **Your own colors or icon**
 

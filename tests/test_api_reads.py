@@ -143,6 +143,32 @@ class APIReadTests(unittest.TestCase):
             self.assertEqual(self.request('/api/chapters?recording_id=missing')[0], 404)
             self.assertEqual(self.request('/api/chapters')[0], 404)
 
+    def test_marker_download_uses_current_recording_data_and_never_omits_an_unknown_time(self):
+        with self.app.lock:
+            store = self.app.store
+            rec = store.create_recording('Shared recording')['id']
+            store.create_race('first', 'Mario Circuit', rec, 0)
+            store.create_session('After the break', store.active_session()['id'])
+            store.create_race('second', 'Rainbow Road', rec)
+            other = store.create_recording('Other recording')['id']
+            store.create_race('excluded', 'Other race', other)
+        url = '/api/chapters?recording_id=' + rec
+        with self.no_full_history():
+            status, body = self.request(url + '&format=edl')
+            self.assertEqual(status, 400)
+            self.assertIn('Rainbow Road', body['error'])
+            self.assertEqual(self.request(url + '&format=txt'), (200, b'00:00:00.000 Mario Circuit\n'))
+            self.assertEqual(self.request(url + '&format=csv')[0], 400)
+            with self.app.lock:
+                store.update_race('second', "Bowser's Castle?", rec, 45849)
+            with urlopen(self.base + url + '&format=edl', timeout=5) as response:
+                self.assertEqual(response.headers.get_filename(), 'race-chapters.edl')
+                self.assertEqual(response.headers.get_content_charset(), 'utf-8')
+                body = response.read().decode('utf-8')
+            self.assertEqual(body.count('|C:ResolveColorBlue'), 2)
+            self.assertLess(body.index('|M:Mario Circuit'), body.index("|M:Bowser's Castle?"))
+            self.assertIn("01:00:45:51 01:00:45:52\r\n |C:ResolveColorBlue |M:Bowser's Castle? |D:1", body)
+
     def test_upload_admission_uses_fresh_folder_lookup_without_history_snapshot(self):
         with self.app.lock:
             folder = self.app.store.create_folder('Upload destination')

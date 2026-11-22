@@ -33,7 +33,7 @@ Complete the [installation guide](../getting-started.md) to create the project e
 
 Open **http://127.0.0.1:8765**. Data is saved in `.local/tracker/`. Add players and teams, assign team membership, create a race, and enter its finishing order. The app requires 12 distinct players per scored race.
 
-The tabbed navigation groups Standings, Capture & review, Videos, Race history, Chapters, and Settings. Only the selected view is shown; the browser remembers your tab. Use arrow keys or Home/End to move between tabs. Opening a race editor selects Race history automatically. Team standings show the gap to the immediately higher team and the room's confirmed points out of **984**, the maximum for twelve 82-point races. Room points include confirmed placements for deleted players; deleting a player does not undo their recorded race. Totals are not capped if you record more than twelve races.
+The tabbed navigation groups Standings, Capture & review, Videos, Race history, Timestamps, Overlays, and Settings. Only the selected view is shown; the browser remembers your tab. Use arrow keys or Home/End to move between tabs. Opening a race editor selects Race history automatically. Team standings show the gap to the immediately higher team and the room's confirmed points out of **984**, the maximum for twelve 82-point races. Room points include confirmed placements for deleted players; deleting a player does not undo their recorded race. Totals are not capped if you record more than twelve races.
 
 For a temporary demonstration using the two manually verified sample results:
 
@@ -137,16 +137,16 @@ Cleanup only removes direct, regular video files from the app's upload directory
 
 During live capture or video imports, the tracker proposes an intro timestamp when the pre-race roster/course screen transitions into the cinematic intro. Markers are sampled estimates, not frame-accurate detection. The history editor lets you correct the course, recording, and offset against the video.
 
-Open **Chapters**, choose a recording, and click **Download chapters** to save its timestamp text file. Lines contain millisecond offsets and course names, for example:
+Open **Timestamps**, choose a recording, select plain text, and click **Download Timestamps**. Lines contain millisecond offsets and course names, for example:
 
 ```text
 00:00:56.000 Whistlestop Summit
 00:03:00.000 Wario Stadium
 ```
 
-Use these as recording-relative references when placing markers or chapters in your video editor. If you trim or rearrange the recording, adjust offsets to the resulting timeline. This version exports a sidecar; it does not embed markers into OBS recordings or create timeline markers in a video editor automatically.
+Use these as recording-relative references when placing markers or chapters in your video editor. If you trim or rearrange the recording, adjust offsets to the resulting timeline. For blue, one-frame timeline markers, choose **DaVinci Resolve markers (.edl)** instead. Use an exact 60 fps non-drop-frame timeline starting at 01:00:00:00. Open that timeline in Resolve, right-click it in the Media Pool, then choose **Timelines > Import > Timeline Markers from EDL**. Neither download modifies the recording.
 
-A race can have a chapter even if its finishing result is absent. Unknown offsets are omitted from the download until corrected. Changing sessions does not reset recording timestamps.
+A race can have a chapter even if its finishing result is absent. TXT omits unknown offsets; EDL requires a valid offset for every race linked to that recording. Changing sessions does not reset recording timestamps.
 
 See [data and backups](data-and-backups.md) before deleting files or moving an installation.
 

@@ -274,6 +274,39 @@ function options(select, rows, emptyLabel, selected = select.value) {
   rows.forEach((row) => select.add(new Option(row.name || row.label, row.id)));
   select.value = selected == null ? '' : String(selected);
 }
+// Recordings can span sessions, and a session can use several recordings.
+function renderTimestampRecordings() {
+  const folders = new Map(state.folders.map(folder => [folder.id, folder.name]));
+  const names = new Map();
+  for (const race of state.races) {
+    if (!race.recording_id || !folders.has(race.folder_id)) continue;
+    if (!names.has(race.recording_id)) names.set(race.recording_id, new Set());
+    names.get(race.recording_id).add(folders.get(race.folder_id));
+  }
+  const counts = new Map();
+  const recordings = state.recordings.map(({id, label}) => {
+    const name = [...(names.get(id) || [])].join(' / ') || label;
+    counts.set(name, (counts.get(name) || 0) + 1);
+    return {id, label, name};
+  });
+  recordings.forEach((row, index) => {
+    if (counts.get(row.name) > 1) {
+      const reference = row.label === row.name ? '' : ` · ${row.label}`;
+      row.name += ` — Recording ${index + 1}${reference}`;
+    }
+  });
+  options($('export-recording'), recordings, 'Choose recording');
+  renderTimestampHelp();
+}
+function renderTimestampHelp() {
+  $('resolve-help').hidden = $('export-format').value !== 'edl';
+  const recording = state?.recordings.find(row => same(row.id, $('export-recording').value));
+  const fps = recording?.fps;
+  const rate = fps === '60000/1001' ? '60000/1001 fps (about 59.94 fps)' : fps ? `${fps} fps` : 'unknown';
+  $('recording-fps').textContent = recording
+    ? `Reported recording rate: ${rate}.`
+    : 'Select a recording to see its frame rate.';
+}
 function table(headers) {
   const node = el('table');
   const head = el('thead');
@@ -784,11 +817,11 @@ function render() {
   renderCameras(state.cameras);
   renderImports();
   renderVideos();
+  renderTimestampRecordings();
   $('session').textContent = `Current session: ${state.folders.find((folder) => same(folder.id, state.session.folder_id))?.name || state.session.id} · ${state.session.started_at}`;
   if (state.tracker_mode === 'ww') {
     renderWW();
     options($('race-recording'), state.recordings, 'No recording / timing unknown');
-    options($('export-recording'), state.recordings, 'Choose recording');
     renderWWHistory();
     return;
   }
@@ -871,7 +904,6 @@ function render() {
   });
   $('players').replaceChildren(state.players.length ? playersTable : el('p', 'Add the 12 players in your room to begin.', 'muted'));
   options($('race-recording'), state.recordings, 'No recording / timing unknown');
-  options($('export-recording'), state.recordings, 'Choose recording');
   renderHistory();
   if (penaltyEditing !== null) renderPenalties();
   // Keep in-progress finishing orders while refreshing available identities.
@@ -1198,7 +1230,9 @@ submit('results', async () => {
   await api(`/api/races/${encodeURIComponent(editing)}/results`, 'POST', {player_ids: selected.map((id) => racePlayers(race).find((player) => same(player.id, id)).id), correction});
   editing = null; $('editor-panel').hidden = true; await refresh(); message('Results saved. Points are calculated from finishing position.');
 });
-submit('export', () => downloadFile(`/api/chapters?recording_id=${encodeURIComponent($('export-recording').value)}`, 'race-chapters.txt', 'Chapter export failed'));
+['export-format', 'export-recording'].forEach(id => $(id).addEventListener('change', renderTimestampHelp));
+submit('export', (form, data) => downloadFile(`/api/chapters?${new URLSearchParams(data)}`,
+  `race-chapters.${data.get('format')}`, 'Timestamp export failed'));
 $('cancel-edit').addEventListener('click', () => { editing = null; $('editor-panel').hidden = true; });
 submit('cleanup-videos', async (form, data) => {
   const days = Number(data.get('older_than_days'));

@@ -34,7 +34,7 @@ The ZIP contains **`manifest.json`** with format `mkw-session-backup`, version *
 
 Referenced PNGs live at `evidence/<mode>/<UUID>.png`. Nothing else is allowed. Import validates the table schema, relationships, twelve-player scored results, WW values and PNG files; it rejects unsupported versions, unexpected files, symbolic links and unsafe paths.
 
-Older version-1 archives without automatic-confirmation provenance are read as ordinary confirmed results. Archives with that provenance require a tracker version supporting it.
+Older version-1 archives without automatic-confirmation provenance are read as ordinary confirmed results. A missing recording frame rate is shown as unknown. To restore a new archive, use a tracker version that supports its fields, including recording FPS.
 
 Limits: **1,000 sessions** per export, **128 MiB** compressed and expanded archive, **16 MiB** manifest, **16 MiB** per still PNG, and **4,096** archive members. ZIP uploads have a two-minute deadline. If an export is too large, choose fewer sessions. Back up original recordings separately.
 

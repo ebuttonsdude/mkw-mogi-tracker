@@ -55,6 +55,12 @@ class ClockTests(unittest.TestCase):
         self.assertNotEqual(first, second)
         self.assertEqual(offset, 200)
 
+    def test_recording_rate_stays_with_its_own_file(self):
+        first, _ = self.clock.update({**status(100), 'recordingFps': '60000/1001'})
+        second, _ = self.clock.update(status(200), [{'eventType': 'RecordFileChanged'}])
+        self.assertEqual(self.store.get_recording(first)['fps'], '60000/1001')
+        self.assertIsNone(self.store.get_recording(second)['fps'])
+
     def test_invalid_clocks_cannot_create_offsets(self):
         for duration in [True, -1, float('nan'), '100']:
             self.assertIsNone(self.clock.update(status(duration))[1])

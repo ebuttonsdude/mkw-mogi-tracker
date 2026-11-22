@@ -48,7 +48,7 @@ A gap in the graph means information is missing. It is not a claim that your VR 
 - Use the same [OBS overlay](obs.md#show-standings-in-obs). It switches to WW with the dashboard.
 - Adjust which VR details appear under **Settings**.
 - Download a session PNG from **Race history**. Its best courses use **Mean position**, lowest first, with **Mean VR change** alongside it. Unknown VR changes are excluded from that mean, not treated as zero.
-- Export known recording timestamps from **Chapters**.
+- Export known recording timestamps from **Timestamps**.
 
 ![Transparent WW OBS overlay showing fictional current VR and session history](images/ww-overlay.png)
 

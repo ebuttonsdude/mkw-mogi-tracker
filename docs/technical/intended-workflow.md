@@ -40,7 +40,7 @@ The overlay shows player/team standings after you confirm each race, not live po
 
 1. Confirm the final race, then click **Stop capture** and wait for capture to stop. End your recording in OBS if you started one.
 2. Open **Race history**, expand the session folder, and choose **View folder PNG** or **Download folder PNG**. Check the confirmed race count and room points. A complete 12-race event has 984 gross placement points; penalties reduce net standings separately.
-3. If you recorded, open **Chapters**, select the recording, and click **Download chapters** to save its course timestamps. Verify them against the recording before editing your video.
+3. If you recorded, open **Timestamps**, select the recording, and click **Download Timestamps** to save its course timestamps. Verify them against the recording before editing your video.
 
 If a race is missed, use its evidence or the original recording to enter the finishing order manually. A suspected screenshot is not verified finishing order. See [reviewing results](user-guide.md#review-captured-results) and [troubleshooting](troubleshooting.md#a-result-was-missed-or-remains-pending).
 
@@ -66,7 +66,7 @@ Use a local recording containing the course/roster screens and initial finishing
 
 ### Export timestamps and results
 
-1. Open **Chapters**, choose the imported recording, and click **Download chapters**. The text file contains recording-relative timestamps and course names. Unknown offsets are omitted until corrected. These are sampled intro estimates, not frame-accurate markers.
+1. Open **Timestamps**, select the imported recording, choose plain text or Resolve EDL, and click **Download Timestamps**. The text file contains recording-relative timestamps and course names. TXT omits unknown offsets; EDL requires you to correct them. These are sampled intro estimates, not frame-accurate markers.
 2. Open **Race history** and choose **View folder PNG** or **Download folder PNG** for the event. Optionally choose your team under **Settings → Highlight team** and save, or use **Race placements for team** in the PNG preview to select its placement grid.
 3. Keep the source video if you need to verify results or timing later. If you uploaded a copy, [video cleanup](user-guide.md#clean-up-uploaded-videos) can remove that copy after confirmation without deleting saved scores or evidence. Original files imported by local path are never deleted by cleanup.
 

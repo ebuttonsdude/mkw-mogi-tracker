@@ -29,6 +29,15 @@ def _text(value, field, limit=200):
     return value.strip()
 
 
+def validate_recording_fps(fps):
+    """Rates are positive decimal or rational text, or unknown for older/manual recordings."""
+    if fps is not None and not (
+            isinstance(fps, str) and len(fps) <= 512
+            and re.fullmatch(r'(?:[1-9][0-9]*(?:/[1-9][0-9]*)?|[0-9]+\.[0-9]+)', fps)
+            and any(char in '123456789' for char in fps)):
+        raise ValueError('Invalid recording frame rate')
+
+
 def _now():
     return datetime.now(timezone.utc).isoformat()
 
@@ -112,6 +121,7 @@ class TrackerStore:
             id TEXT PRIMARY KEY, name TEXT NOT NULL, created_at TEXT NOT NULL)""")
         additions = {
             "history_folders": [("lounge_id", "TEXT")],
+            "recordings": [("fps", "TEXT")],
             "players": [("active", "INTEGER NOT NULL DEFAULT 1")],
             "teams": [("active", "INTEGER NOT NULL DEFAULT 1"), ("color", "TEXT")],
             "sessions": [("folder_id", "TEXT REFERENCES history_folders(id)"),
@@ -303,10 +313,11 @@ class TrackerStore:
         return self._active("teams", team_id)
 
     def recording_chapters(self, recording_id):
+        """Return every race linked to this recording, including unverified offsets."""
         if not self._rows("SELECT 1 FROM recordings WHERE id=?", (recording_id,)):
             raise KeyError("recording")
         return self._rows("""SELECT course,offset_ms FROM races
-            WHERE recording_id=? AND offset_ms IS NOT NULL ORDER BY offset_ms,rowid""", (recording_id,))
+            WHERE recording_id=? ORDER BY offset_ms,rowid""", (recording_id,))
 
     def count_recording_races(self, recording_id):
         return self._rows("SELECT COUNT(*) AS count FROM races WHERE recording_id=?", (recording_id,))[0]["count"]
@@ -414,7 +425,16 @@ class TrackerStore:
                 raise ValueError("races cannot move between independent sessions")
         return self._race(race["id"])
 
-    def create_recording(self, label, recording_id=None):
+    def get_recording(self, recording_id):
+        return self._get("recordings", recording_id)
+
+    def set_recording_fps(self, recording_id, fps):
+        validate_recording_fps(fps)
+        with self._transaction():
+            self._write("UPDATE recordings SET fps=? WHERE id=?", (fps, recording_id))
+
+    def create_recording(self, label, recording_id=None, *, fps=None):
+        validate_recording_fps(fps)
         label = _text(label, "label")
         recording_id = str(uuid4()) if recording_id is None else _text(recording_id, "recording_id")
         with self._transaction():
@@ -423,7 +443,8 @@ class TrackerStore:
                 if previous[0]["label"] != label:
                     raise ValueError("recording_id already has a different label")
             else:
-                self._write("INSERT INTO recordings VALUES (?, ?, ?)", (recording_id, label, _now()))
+                self._write("INSERT INTO recordings (id,label,started_at,fps) VALUES (?,?,?,?)",
+                            (recording_id, label, _now(), fps))
         return self._get("recordings", recording_id)
 
     def create_race(self, race_id, course, recording_id=None, offset_ms=None, folder_id=None, *, session_id=None,
