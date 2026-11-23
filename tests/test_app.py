@@ -699,22 +699,27 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(render.call_args.kwargs['theme']['id'], 'cow')
         self.assertIn('tokens', render.call_args.kwargs['theme'])
 
-    def test_saved_graph_style_applies_to_teams_preview_and_download_only(self):
-        folder = self.app.store.active_session()['folder_id']
+    def test_saved_graph_style_applies_to_both_mogi_modes_but_not_ww(self):
+        session = self.app.store.active_session()
         with patch('mkw_tracker.server.render_folder_png', return_value=b'png') as render:
-            for style in ('cumulative', 'relative'):
-                status, saved = self.request('/api/settings', 'PATCH', {'mogi_png_graph': style})
-                self.assertEqual((status, saved['mogi_png_graph']), (200, style))
-                for name in ('preview', 'report'):
-                    self.assertEqual(self.request(f'/api/folders/{folder}/{name}.png'), (200, b'png'))
-                    self.assertEqual(render.call_args.kwargs['mogi_png_graph'], style)
-            session = self.app.switch_tracker_mode('ffa', self.app.store.active_session()['id'])['session']
-            self.assertEqual(self.request(f"/api/folders/{session['folder_id']}/report.png"), (200, b'png'))
-            self.assertNotIn('mogi_png_graph', render.call_args.kwargs)
+            for mode in ('mogi', 'ffa'):
+                if mode == 'ffa':
+                    session = self.app.switch_tracker_mode(mode, session['id'])['session']
+                for style in ('cumulative', 'relative'):
+                    status, saved = self.request('/api/settings', 'PATCH', {
+                        'mogi_png_graph': style, 'expected_tracker_mode': mode})
+                    self.assertEqual(status, 200, saved)
+                    self.assertEqual(saved['mogi_png_graph'], style)
+                    for name in ('preview', 'report'):
+                        with self.subTest(mode=mode, style=style, endpoint=name):
+                            url = f"/api/folders/{session['folder_id']}/{name}.png"
+                            self.assertEqual(self.request(url), (200, b'png'))
+                            self.assertEqual(render.call_args.kwargs['mogi_png_graph'], style)
         session = self.app.switch_tracker_mode('ww', session['id'])['session']
         with patch('mkw_tracker.ww_reports.render_ww_folder_png', return_value=b'ww') as render_ww:
-            self.assertEqual(self.request(f"/api/folders/{session['folder_id']}/report.png"), (200, b'ww'))
-            self.assertNotIn('mogi_png_graph', render_ww.call_args.kwargs)
+            for name in ('preview', 'report'):
+                self.assertEqual(self.request(f"/api/folders/{session['folder_id']}/{name}.png"), (200, b'ww'))
+                self.assertNotIn('mogi_png_graph', render_ww.call_args.kwargs)
 
     def test_png_preview_is_inline_and_download_still_attached(self):
         folder = self.app.store.snapshot()['session']['folder_id']

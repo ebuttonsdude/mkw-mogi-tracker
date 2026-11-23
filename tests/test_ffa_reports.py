@@ -44,11 +44,29 @@ class FFAReportTests(unittest.TestCase):
         self.assertEqual(player['races'][0]['net_points'], -5)
         series = next(p for p in cumulative_player_series(report) if p['id'] == self.ids[-1])
         self.assertEqual(series['values'], [-5, None, None])
+        relative = {p['id']: p['values'] for p in cumulative_player_series(report, relative=True)}
+        self.assertAlmostEqual(relative[self.ids[-1]][0], -5 - 82 / 12)
+        self.assertEqual(relative[self.ids[-1]][1:], [None, None])
         self.store.reorder_history(self.folder, ['later', 'first', 'pending'], ['first', 'pending', 'later'])
         report = folder_report(self.snapshot(), self.folder)
         series = next(p for p in cumulative_player_series(report) if p['id'] == self.ids[-1])
         self.assertEqual([r['id'] for r in report['races']], ['later', 'first', 'pending'])
         self.assertEqual(series['values'], [1, -4, None])
+        relative = {p['id']: p['values'] for p in cumulative_player_series(report, relative=True)}
+        self.assertAlmostEqual(relative[self.ids[-1]][0], 1 - 82 / 12)
+        self.assertAlmostEqual(relative[self.ids[-1]][1], -4 - 164 / 12)
+        self.assertIsNone(relative[self.ids[-1]][2])
+
+    def test_relative_series_keeps_twelve_player_pace_with_a_substitute(self):
+        sub = self.store.add_player('Sub')['id']
+        self.store.create_race('second', 'Rainbow Road')
+        self.store.submit_result('second', [sub, *self.ids[1:]])
+        report = folder_report(self.snapshot(), self.folder)
+        relative = {p['id']: p['values'] for p in cumulative_player_series(report, relative=True)}
+        self.assertAlmostEqual(relative[sub][0], -82 / 12)
+        self.assertAlmostEqual(relative[self.ids[0]][0], 15 - 82 / 12)
+        self.assertAlmostEqual(relative[sub][1], 15 - 164 / 12)
+        self.assertEqual(relative[sub][1], relative[self.ids[0]][1])
 
     def test_text_and_markdown_are_player_only_and_escape_names(self):
         self.store.update_player(self.ids[0], '選手 | <Ω>', None)
@@ -75,6 +93,15 @@ class FFAReportTests(unittest.TestCase):
         self.assertIn('FFA player standings · Net points', labels)
         self.assertNotIn('Unassigned', labels)
         self.assertIn('Place 1', labels)
+        with patch('mkw_tracker.reports._draw_text', autospec=True) as relative_draw:
+            render_folder_png(state, self.folder, highlight_player_id=self.ids[0],
+                              highlight_session_id=state['session']['id'], mogi_png_graph='relative')
+        relative_labels = [call.args[2] for call in relative_draw.call_args_list]
+        self.assertIn('Player points above/below average', relative_labels)
+        self.assertIn('0 · average', relative_labels)
+        self.assertNotIn('Cumulative player net points', relative_labels)
+        standings = 'FFA player standings · Net points'
+        self.assertEqual(labels[labels.index(standings):], relative_labels[relative_labels.index(standings):])
         for call in draw.call_args_list:
             if '選手' in call.args[2]:
                 self.assertNotEqual(call.kwargs['font'].getname()[0], 'Racers Delight')

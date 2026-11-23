@@ -140,7 +140,7 @@ Avoid deleting a session just to start fresh. Create a new session instead.
 
 Open **Race history**, expand the session, and select **View folder PNG** or **Download folder PNG**. The preview also offers **Copy image**. If copying fails, download the image instead.
 
-For Mogi Teams, choose one graph under **Settings → Mogi Teams PNG graph**. **Cumulative net points** shows how many points each team has. **Points above/below average** shows whether each team is ahead of or behind average pace for its size. In a 6v6, the pace is 41 points per team per race. If a team starts at +7 and scores 38, it ends at +4: still ahead of pace, but down three that race. The standings below the graph always show actual net points.
+Mogi Teams and FFA share the choice under **Settings → Mogi PNG graph**. **Cumulative net points** shows actual scores. **Points above/below average** shows how far ahead of or behind average pace each player or team is. In FFA, average pace is 82/12 (about 6.83) points per race: after three races, a player with 24 net points is 3.5 points above pace. In a 6v6, average pace is 41 points per team per race. The standings below the graph always show actual net points.
 
 **An OBS overlay**
 

@@ -228,6 +228,10 @@ def _font(ImageFont, size):
                        f'{detail} Fonts are never downloaded during export.')
 
 
+def _average_pace(races, players):
+    return races * sum(POINTS) * players / len(POINTS)
+
+
 def cumulative_team_series(report, *, relative=False):
     """Net team prefix sums; a pending race makes its entire later prefix unknown.
 
@@ -246,7 +250,7 @@ def cumulative_team_series(report, *, relative=False):
             else:
                 running += team['races'][index] or 0
                 if relative:
-                    expected = (index + 1) * sum(POINTS) * team_sizes[team['id']] / len(POINTS)
+                    expected = _average_pace(index + 1, team_sizes[team['id']])
                     values.append(running - expected)
                 else:
                     values.append(running)
@@ -254,8 +258,8 @@ def cumulative_team_series(report, *, relative=False):
     return series
 
 
-def cumulative_player_series(report):
-    """Net player prefixes, with the same pending-race boundary as team charts."""
+def cumulative_player_series(report, *, relative=False):
+    """Net player prefixes, optionally relative to one player's gross room share."""
     series = []
     for player in report['players']:
         running, blocked, values = 0, False, []
@@ -266,7 +270,7 @@ def cumulative_player_series(report):
             else:
                 cell = player['races'][index]
                 running += cell['net_points'] if cell else 0
-                values.append(running)
+                values.append(running - _average_pace(index + 1, 1) if relative else running)
         series.append({'id': player['id'], 'name': player['name'], 'values': values})
     return series
 
@@ -368,10 +372,10 @@ def render_folder_png(snapshot, folder_id, theme='mario', *, highlight_team_id=N
             if (column + row) % 2 == 0:
                 rectangle((column * 12, bar_height + row * 6,
                            column * 12 + 12, bar_height + row * 6 + 6), tokens['line'])
-    relative = not is_ffa and mogi_png_graph == 'relative'
+    relative = mogi_png_graph == 'relative'
     if is_ffa:
-        chart_title = 'Cumulative player net points'
-        series = cumulative_player_series(report)
+        chart_title = 'Player points above/below average' if relative else 'Cumulative player net points'
+        series = cumulative_player_series(report, relative=relative)
     else:
         chart_title = 'Team points above/below average' if relative else 'Cumulative team net points'
         series = cumulative_team_series(report, relative=relative)

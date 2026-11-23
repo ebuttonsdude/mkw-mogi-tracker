@@ -1312,7 +1312,7 @@ $('mogi-png-graph').addEventListener('change', (event) => {
   run(select, async () => {
     try {
       await api('/api/settings', 'PATCH', {mogi_png_graph: select.value});
-      await refresh(false, true); message('Mogi Teams PNG graph saved.');
+      await refresh(false, true); message('Mogi PNG graph saved.');
     } catch (error) { select.value = state.settings?.mogi_png_graph || 'cumulative'; throw error; }
   });
 });

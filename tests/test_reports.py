@@ -299,7 +299,7 @@ class ReportTests(unittest.TestCase):
             self.assertLessEqual(image.width, 1400)
             self.assertLessEqual(image.height, 1000)
 
-    def test_relative_png_switches_one_chart_only_and_ignores_ffa(self):
+    def test_relative_team_png_switches_one_chart_only(self):
         team = self.store.create_team('Solo')['id']
         self.store.update_player(self.ids[0], 'Leader', team)
         self.score()
@@ -319,8 +319,6 @@ class ReportTests(unittest.TestCase):
         self.assertTrue(any(label.startswith('-') and label[1:].isdigit() for label in relative))
         standings = 'Team standings · Players ranked overall · Net points'
         self.assertEqual(ordinary[ordinary.index(standings):], relative[relative.index(standings):])
-        state['folders'][0]['format'] = 'ffa'
-        self.assertEqual(labels('relative'), labels('cumulative'))
 
     def test_png_grouped_members_overall_ranks_team_totals_and_theme(self):
         from PIL import Image

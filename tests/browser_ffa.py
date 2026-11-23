@@ -75,6 +75,12 @@ def main():
                 expect(page.locator('#tracker-mode')).to_be_enabled()
                 page.locator('#auto-refresh').uncheck()
                 switch_mode('ffa')
+                page.locator('#tab-settings').click()
+                graph_details = page.locator('#mogi-png-details')
+                graph_details.locator('summary').click()
+                graph = page.get_by_label('Graph style', exact=True)
+                graph.select_option('relative')
+                expect(page.locator('#message')).to_have_text('Mogi PNG graph saved.')
                 page.locator('#tab-standings').click()
                 expect(page.locator('#team-section')).to_be_hidden()
                 expect(page.locator('#player-section')).to_be_visible()
@@ -150,7 +156,11 @@ def main():
                 with app.lock:
                     assert app.store.active_session()['id'] == team_session
                     assert app.store.get_team(team['id'])['name'] == 'Existing team'
+                page.locator('#tab-settings').click()
+                expect(graph).to_have_value('relative')
                 switch_mode('ww')
+                expect(page.locator('#settings-section')).to_be_visible()
+                expect(graph_details).to_be_hidden()
                 switch_mode('ffa')
                 page.reload()
                 expect(page.locator('#tracker-mode')).to_have_value('ffa')
