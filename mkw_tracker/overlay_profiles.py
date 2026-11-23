@@ -68,10 +68,9 @@ class OverlayProfiles:
                 result[key] = text(value, 80, 'source name')
             elif key == 'overlay':
                 if value:
-                    merge_settings(DEFAULT_SETTINGS, {'overlay': value}, theme_resolver=self.resolve_theme)
+                    result[key] = merge_settings({'overlay': current[key]}, {'overlay': value})['overlay']
                 elif value != {}:
                     raise ValueError('Provide overlay options.')
-                result[key].update(value)
             elif key in ('theme', 'report_font'):
                 if value is not None:
                     merge_settings(DEFAULT_SETTINGS, {key: value}, theme_resolver=self.resolve_theme)

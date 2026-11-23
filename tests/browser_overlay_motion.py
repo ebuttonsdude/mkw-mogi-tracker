@@ -102,8 +102,17 @@ def main():
                 page.goto(base)
                 page.locator('[data-tab="overlays"]').click()
                 form = page.locator('#overlay-settings')
+                during = form.get_by_label('Automatically show during races / hide after results', exact=True)
+                after = form.get_by_label('Automatically hide during races / show after results', exact=True)
+                expect(after).to_be_checked()
+                during.check()
+                expect(after).not_to_be_checked()
+                during.uncheck()
+                expect(after).not_to_be_checked()  # Both off leaves manual visibility.
+                during.check()
+                after.check()
+                expect(during).not_to_be_checked()
                 form.locator('[name="transition_style"]').select_option('checkered')
-                form.locator('[name="auto_visibility"]').check()
                 form.locator('[name="slide_duration"]').fill('850')
                 form.get_by_role('button', name='Save overlay settings').click()
                 expect(page.locator('#message')).to_contain_text('saved')
@@ -114,26 +123,37 @@ def main():
                 response = page.request.post(base + '/api/overlay-profiles', data={
                     'slug': 'race-cards', 'name': 'Race cards'})
                 assert response.ok, response.text()
-                settings(auto_visibility=False)
                 expect(page.locator('#overlay-source option[value="race-cards"]')).to_have_count(1)
                 page.locator('#overlay-source').select_option('race-cards')
                 form.locator('[name="transition_style"]').select_option('fade')
-                form.locator('[name="auto_visibility"]').check()
+                during.check()
+                expect(after).not_to_be_checked()
                 form.locator('[name="slide_duration"]').fill('0')
                 with page.expect_response(lambda response: response.url.endswith('/api/overlay-profiles/race-cards')
                                            and response.request.method == 'PATCH') as saved:
                     form.get_by_role('button', name='Save overlay settings').click()
                 assert saved.value.ok
                 source = app.overlay_profiles.get('race-cards')['overlay']
-                assert source['auto_visibility'] is True and source['transition_style'] == 'fade'
-                assert app.settings['overlay']['auto_visibility'] is False
+                assert source['auto_visibility_during_races'] and not source['auto_visibility']
+                assert source['transition_style'] == 'fade'
+                assert app.settings['overlay']['auto_visibility'] and not app.settings['overlay']['auto_visibility_during_races']
                 assert app.settings['overlay']['transition_style'] == 'checkered'
+                page.reload()
+                page.locator('[data-tab="overlays"]').click()
+                page.locator('#overlay-source').select_option('race-cards')
+                expect(during).to_be_checked()
+                expect(after).not_to_be_checked()
+
+                response = page.request.post(base + '/api/overlay/race-cards/hide', data={})
+                assert response.ok
                 page.goto(base + '/overlay/race-cards')
                 expect(overlay).to_have_attribute('data-transition', 'fade')
-                with app.lock:
-                    app.capture._emit_overlay_event(False, app.store.active_session()['id'])
                 expect(overlay).to_have_attribute('aria-hidden', 'true', timeout=5000)
-                assert page.request.get(base + '/api/overlay').json()['visible'] is True
+                for results in (False, True):
+                    with app.lock:
+                        app.capture._emit_overlay_event(results, app.store.active_session()['id'])
+                    expect(overlay).to_have_attribute('aria-hidden', str(results).lower(), timeout=5000)
+                    assert page.request.get(base + '/api/overlay').json()['visible'] is results
                 response = page.request.post(base + '/api/overlay/race-cards/show', data={})
                 assert response.ok
                 expect(overlay).to_have_attribute('aria-hidden', 'false', timeout=5000)

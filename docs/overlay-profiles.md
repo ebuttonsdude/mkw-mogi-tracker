@@ -26,7 +26,7 @@ All sources follow the application's current mode and active session. They are
 not independent score databases or historical-session views. Up to 16 sources
 (including Default) are supported. Source names can change; slugs are stable.
 Deleting a named source makes its URL return not found; Default cannot be deleted.
-Show/hide/toggle controls address the selected source only. Each source also has its own **Automatically hide during races / show after results** option and **Show / hide effect**. Enable automation separately on the sources that should disappear during racing; leave other sources visible. New or newly enabled sources wait for the next live race event. Visibility is temporary,
+Show/hide/toggle controls address the selected source only. Under **Selected source display settings**, choose **Automatically show during races / hide after results** for a race-time source, or **Automatically hide during races / show after results** for a results-time source. For example, use the first on a player card and the second on standings to alternate them in OBS. Leave both unchecked for manual control. Each source keeps its own **Show / hide effect**. A new source, or one with a newly selected direction, waits for the next live race event. Visibility is temporary,
 not a saved preference; application restart starts sources shown.
 
 ### Assign or move existing content

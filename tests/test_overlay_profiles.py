@@ -59,6 +59,23 @@ class ProfileTests(unittest.TestCase):
         restored.delete('cards')
         self.assertEqual(len(restored.public(settings)), 1)
 
+    def test_legacy_sources_keep_their_visibility_direction_when_default_changes(self):
+        saved = {'default': {'name': 'Default'}, 'manual': {'overlay': {'auto_visibility': False}},
+                 'standings': {'overlay': {'auto_visibility': True}}}
+        self.profiles.path.write_text(json.dumps(saved))
+        profiles = OverlayProfiles(self.root, resolve_theme)
+        settings = deepcopy(DEFAULT_SETTINGS)
+        settings['overlay']['auto_visibility_during_races'] = True
+        for key, old in [('manual', False), ('standings', True)]:
+            overlay = profiles.effective(key, settings)[1]['overlay']
+            self.assertEqual(overlay['auto_visibility'], old)
+            self.assertFalse(overlay['auto_visibility_during_races'])
+        profiles.update('standings', {'overlay': {'auto_visibility_during_races': True}})
+        restored = OverlayProfiles(self.root, resolve_theme)
+        overlay = restored.effective('standings', DEFAULT_SETTINGS)[1]['overlay']
+        self.assertTrue(overlay['auto_visibility_during_races'])
+        self.assertFalse(overlay['auto_visibility'])
+
     def test_lounge_appearance_partial_merge_isolated_persistence_and_legacy_defaults(self):
         self.profiles.create('cards', 'Cards', DEFAULT_SETTINGS)
         self.profiles.update('cards', {'lounge': {
@@ -482,6 +499,26 @@ class ProfileApiTests(unittest.TestCase):
         self.request('/api/overlay/race/show', 'POST')
         self.assertTrue(self.request('/api/overlay/race')[1]['visible'])
         self.request('/api/overlay/default/show', 'POST')
+        self.assertTrue(self.request('/api/overlay')[1]['visible'])
+
+    def test_named_race_overlay_waits_for_next_edge_and_honors_manual_visibility(self):
+        self.assertEqual(self.request('/api/overlay-profiles', 'POST', {'slug': 'hud', 'name': 'Race HUD'})[0], 200)
+        session = self.app.store.active_session()['id']
+        self.app.capture._emit_overlay_event(True, session)  # Previous, unpolled results.
+        config = '/api/overlay-profiles/hud'
+        self.assertEqual(self.request(config, 'PATCH', {'overlay': {'auto_visibility_during_races': True}})[0], 200)
+        self.assertEqual(self.request(config, 'PATCH', {'overlay': {
+            'auto_visibility': True, 'auto_visibility_during_races': True}})[0], 400)
+        hud = '/api/overlay/hud'
+        self.assertTrue(self.request(hud)[1]['visible'])
+        self.request(hud + '/hide', 'POST')
+        self.app.capture._emit_overlay_event(False, session)
+        self.assertTrue(self.request(hud)[1]['visible'])
+        self.request(hud + '/hide', 'POST')
+        self.assertFalse(self.request(hud)[1]['visible'])
+        self.request(hud + '/show', 'POST')
+        self.app.capture._emit_overlay_event(True, session)
+        self.assertFalse(self.request(hud)[1]['visible'])
         self.assertTrue(self.request('/api/overlay')[1]['visible'])
 
     def test_new_sources_and_enabling_do_not_replay_old_intro(self):

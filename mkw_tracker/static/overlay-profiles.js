@@ -22,6 +22,7 @@ const OverlaySources = (() => {
   let lastMode = null;
   let saving = false;
   const metricLabels = {username: 'Username', division: 'Division', mmr: 'MMR', leaderboard_rank: 'Leaderboard rank', peak_mmr: 'Peak MMR · season', events: 'Events · season', positive_mmr_rate: 'Positive-MMR event rate · season', average_score: 'Average event score · season', last_five_form: 'Form · last up to 5 events', last_ten_record: 'Win % · last up to 10 events', last_ten_mmr_change: 'Event MMR change · last up to 10', last_ten_average_score: 'Average score · last up to 10', weekly_events: 'Verified events · derived last 7 days', weekly_positive_mmr_rate: 'Positive-MMR rate · derived last 7 days', weekly_event_mmr_change: 'Event MMR change · derived last 7 days', weekly_average_score: 'Average score · derived last 7 days'};
+  const visibilityOptions = ['auto_visibility', 'auto_visibility_during_races'];
   const blocks = ['header', 'standings', 'ww_player', 'ww_stats', 'ww_graph', 'lounge'];
   const byId = id => document.getElementById(id);
   const current = state => (cachedProfiles || state.overlay_profiles)?.find(p => p.slug === selected);
@@ -362,7 +363,7 @@ const OverlaySources = (() => {
     byId('lounge-room-size').value = source.lounge.room_size;
     for (const key of ['background', 'border', 'shape']) byId(`lounge-${key}`).value = source.lounge.appearance[key];
     Object.keys(metricLabels).forEach(key => { byId(`lounge-metric-${key}`).checked = key === 'last_five_form' ? source.lounge.metrics[key] === true : source.lounge.metrics[key] !== false; });
-    for (const key of ['auto_visibility', 'transition_style']) byId(`source-option-${key}`).hidden = !Object.hasOwn(overlay, key);
+    for (const key of [...visibilityOptions, 'transition_style']) byId(`source-option-${key}`).hidden = !Object.hasOwn(overlay, key);
     byId('overlay-source-delete').hidden = selected === 'default';
     recommendLoungeSize(state);
   }
@@ -391,7 +392,14 @@ const OverlaySources = (() => {
       const input = document.createElement('input'); input.type = 'checkbox'; input.id = `lounge-metric-${key}`;
       node.append(input, document.createTextNode(label)); byId('lounge-metrics').append(node);
     }
-    byId('overlay-settings').addEventListener('input', () => { overlayDirty = true; invalidate(); recommendLoungeSize(state); });
+    byId('overlay-settings').addEventListener('input', event => {
+      if (event.target.checked && visibilityOptions.includes(event.target.name)) {
+        for (const key of visibilityOptions) {
+          if (key !== event.target.name) event.currentTarget.elements[key].checked = false;
+        }
+      }
+      overlayDirty = true; invalidate(); recommendLoungeSize(state);
+    });
     byId('overlay-source-settings').addEventListener('input', () => { contentDirty = true; invalidate(); recommendLoungeSize(state); });
     byId('lounge-use-size').addEventListener('click', () => {
       const size = recommendLoungeSize(state);
@@ -456,11 +464,6 @@ const OverlaySources = (() => {
   async function saveOverlay(overlay) {
     if (saving) throw new Error('Another overlay save is still running.');
     const key = selected, before = revision, mode = state.tracker_mode || 'mogi';
-    const effective = current(state)?.effective.overlay || {};
-    for (const option of ['auto_visibility', 'transition_style']) {
-      const input = byId('overlay-settings').elements.namedItem(option);
-      if (Object.hasOwn(effective, option)) overlay[option] = input.type === 'checkbox' ? input.checked : input.value;
-    }
     saving = true;
     try {
       await writeDisplay(key, overlay, mode);

@@ -324,14 +324,21 @@ class Application:
         if event is None or self._overlay_events_seen.get(self.capture) == event:
             return
         self._overlay_events_seen[self.capture] = event
-        _, session_id, visible = event
+        _, session_id, is_results = event
         if session_id != self.store.active_session()['id']:
             return
-        automatic = self.settings['overlay']['auto_visibility']
-        if automatic:
-            self.overlay_visible = visible
+        defaults = self.settings['overlay']
         for key, source in self.overlay_profiles.profiles.items():
-            if key != 'default' and source['overlay'].get('auto_visibility', automatic):
+            options = defaults if key == 'default' else defaults | source['overlay']
+            if options['auto_visibility_during_races']:
+                visible = not is_results
+            elif options['auto_visibility']:
+                visible = is_results
+            else:
+                continue
+            if key == 'default':
+                self.overlay_visible = visible
+            else:
                 self.overlay_profiles.visible[key] = visible
 
     def _configure_lounge(self):

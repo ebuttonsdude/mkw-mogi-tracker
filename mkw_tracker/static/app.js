@@ -1527,7 +1527,8 @@ function collectOverlaySettings(form, mode = state.tracker_mode || 'mogi') {
   ['width', 'height', 'font_size', 'opacity', 'scroll_speed', 'slide_duration'].forEach((key) => { overlay[key] = Number(data.get(key)); });
   if (mode === 'mogi') overlay.highlight_team_id = data.get('highlight_team_id') || null;
   if (mode === 'ffa') overlay.highlight_player_id = data.get('highlight_player_id') || null;
-  (mode === 'ww' ? ['auto_visibility', 'show_header', 'animate', 'scroll', 'ww_show_graph', 'ww_show_current', 'ww_show_peak', 'ww_show_lowest', 'ww_show_last_10', 'ww_show_character'] : ['auto_visibility', 'show_header', 'show_players', 'show_gaps', 'animate', 'scroll', 'alternating_backgrounds']).forEach((key) => { if (mode !== 'ffa' || key !== 'show_players') overlay[key] = form.elements[key].checked; });
+  for (const key of ['auto_visibility', 'auto_visibility_during_races']) overlay[key] = form.elements[key].checked;
+  (mode === 'ww' ? ['show_header', 'animate', 'scroll', 'ww_show_graph', 'ww_show_current', 'ww_show_peak', 'ww_show_lowest', 'ww_show_last_10', 'ww_show_character'] : ['show_header', 'show_players', 'show_gaps', 'animate', 'scroll', 'alternating_backgrounds']).forEach((key) => { if (mode !== 'ffa' || key !== 'show_players') overlay[key] = form.elements[key].checked; });
   return overlay;
 }
 submit('overlay-settings', async (form) => {

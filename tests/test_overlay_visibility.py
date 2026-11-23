@@ -19,6 +19,7 @@ except ImportError:
 class OverlayMotionSettingsTests(unittest.TestCase):
     def test_defaults_and_all_transition_choices(self):
         self.assertFalse(DEFAULT_SETTINGS['overlay']['auto_visibility'])
+        self.assertFalse(DEFAULT_SETTINGS['overlay']['auto_visibility_during_races'])
         for style in ('slide', 'fade', 'checkered', 'dissolve', 'zoom', 'flip', 'iris', 'wipe'):
             settings = merge_settings(DEFAULT_SETTINGS, {'overlay': {
                 'auto_visibility': True, 'transition_style': style}})
@@ -26,8 +27,18 @@ class OverlayMotionSettingsTests(unittest.TestCase):
             self.assertTrue(settings['overlay']['auto_visibility'])
         self.assertEqual(DEFAULT_SETTINGS['overlay']['transition_style'], 'slide')
 
+    def test_switching_direction_with_partial_updates_and_rejecting_a_conflict(self):
+        settings = merge_settings(DEFAULT_SETTINGS, {'overlay': {'auto_visibility': True}})
+        reverse = merge_settings(settings, {'overlay': {'auto_visibility_during_races': True}})
+        self.assertTrue(reverse['overlay']['auto_visibility_during_races'])
+        self.assertFalse(reverse['overlay']['auto_visibility'])
+        self.assertEqual(merge_settings(reverse, {'overlay': {'auto_visibility': True}}), settings)
+        with self.assertRaises(ValueError):
+            merge_settings(reverse, {'overlay': {'auto_visibility': True, 'auto_visibility_during_races': True}})
+
     def test_invalid_values_do_not_mutate_settings(self):
         for key, value in [('auto_visibility', 1), ('auto_visibility', 'yes'),
+                           ('auto_visibility_during_races', 1), ('auto_visibility_during_races', 'no'),
                            ('transition_style', 'random'), ('transition_style', None)]:
             settings = deepcopy(DEFAULT_SETTINGS)
             with self.assertRaises(ValueError):
@@ -152,15 +163,20 @@ class AutomaticOverlayTests(unittest.TestCase):
         self.assertIsNone(self.app.capture.overlay_event)
         self.assertTrue(self.visible())
 
-    def test_ffa_and_ww_use_their_own_live_events(self):
-        for mode in ('ffa', 'ww'):
-            self.app.switch_tracker_mode(mode, self.app.store.active_session()['id'])
+    def test_opposite_overlays_follow_live_edges_in_all_modes(self):
+        self.app.overlay_profiles.create('standings', 'Results standings', self.app.settings)
+        self.app.update_settings({'overlay': {'auto_visibility_during_races': True}})
+        for mode in ('mogi', 'ffa', 'ww'):
+            if mode != 'mogi':
+                self.app.switch_tracker_mode(mode, self.app.store.active_session()['id'])
+            self.app.overlay_visible = False
             self.app.capture.reader = self.reader
             self.reader.read.return_value = {'phase': 'unknown', 'rows': []}
             self.reader.read_results.return_value = None
             self.reader.is_results_layout.return_value = False
             self.intro()
-            self.assertFalse(self.visible(), mode)
+            self.assertTrue(self.visible(), mode)
+            self.assertFalse(self.app.overlay_snapshot(profile='standings')['visible'], mode)
             if mode == 'ww':
                 self.reader.read_results.return_value = {'phase': 'final', 'position': 1,
                                                         'vr': 9000, 'delta': None}
@@ -168,7 +184,8 @@ class AutomaticOverlayTests(unittest.TestCase):
                 self.app.capture.observe(self.frame)
             else:
                 self.result()
-            self.assertTrue(self.visible(), mode)
+            self.assertFalse(self.visible(), mode)
+            self.assertTrue(self.app.overlay_snapshot(profile='standings')['visible'], mode)
 
     def test_ww_manual_edit_during_result_image_save_still_shows(self):
         self.app.switch_tracker_mode('ww', self.app.store.active_session()['id'])

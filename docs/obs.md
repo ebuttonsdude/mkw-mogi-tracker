@@ -42,9 +42,14 @@ OBS only needs to be open with its WebSocket server enabled. You do **not** need
 
 The numbers update after you confirm mogi results. They are **not live positions during a race**.
 
-Use **Show overlay**, **Hide overlay**, or **Toggle overlay** in Settings. Turn off **Enable animations** if you prefer a still display.
+Use **Show overlay**, **Hide overlay**, or **Toggle overlay** in the **Overlays** tab. Turn off **Enable animations** if you prefer a still display.
 
-To automate this, enable **Automatically hide during races / show after results** and save. Live capture hides the overlay when it recognizes the course intro, then shows it when finishing results are accepted. Mogi results still need your confirmation before points count (unless you explicitly enabled YOLO). Manual controls work until the next detected event. Imports and manual score edits do not change visibility; if capture misses an intro or results, use the manual buttons.
+Under **Overlays → Selected source display settings**, choose when the source should be visible, then select **Save overlay settings**:
+
+- **Automatically show during races / hide after results** shows it when live capture recognizes a course intro and hides it when finishing results are detected and accepted for review or scoring.
+- **Automatically hide during races / show after results** does the opposite.
+
+Choosing one clears the other. Leave both off for manual control. Enabling either option waits for the next detected intro or results; it does not immediately show or hide the source. Mogi results still need your confirmation before points count (unless you explicitly enabled YOLO). Manual controls work until the next detected event. Imports and manual score edits do not change visibility; if capture misses an intro or results, use the manual buttons.
 
 Choose a **Show / hide effect**: bouncy slide, soft fade, checkered flag wipe, pixel dissolve, pop zoom, 3D flip, circle iris, or curtain wipe. **Transition duration** controls the speed; `0` switches instantly. Reduced-motion preferences also switch instantly. Hiding keeps the current standings and scroll position.
 

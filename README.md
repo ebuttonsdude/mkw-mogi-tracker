@@ -24,7 +24,7 @@ You use the app in your browser. Your scores and recordings stay local. An optio
 
 <img src="docs/images/overlay.png" alt="OBS standings overlay showing fictional demonstration scores" width="300">
 
-*The OBS overlay shows post-race standings, not live positions during a race. Optional automatic visibility hides it at a detected race intro and shows it after results, with selectable transitions.*
+*The OBS overlay shows post-race standings, not live positions during a race. Each overlay source can automatically show during races and hide after results, or do the opposite.*
 
 </details>
 

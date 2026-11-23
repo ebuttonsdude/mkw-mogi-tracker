@@ -258,7 +258,7 @@
     applyVisibility(data);
     const nextSignature = JSON.stringify({...data, visible: undefined,
       settings: {...settings, slide_direction: undefined, slide_duration: undefined,
-        transition_style: undefined, auto_visibility: undefined}});
+        transition_style: undefined, auto_visibility: undefined, auto_visibility_during_races: undefined}});
     if (nextSignature === signature) return;
     signature = nextSignature;
     const tokens = data.theme?.tokens || {};

@@ -15,7 +15,7 @@ DEFAULT_SETTINGS = {
                 'scroll_speed': 30, 'title': '', 'highlight_team_id': None, 'highlight_player_id': None,
                 'alternating_backgrounds': True, 'slide_direction': 'left',
                 'slide_duration': 400, 'ww_show_graph': True, 'ww_show_current': True,
-                'auto_visibility': False, 'transition_style': 'slide',
+                'auto_visibility': False, 'auto_visibility_during_races': False, 'transition_style': 'slide',
                 'ww_show_peak': True, 'ww_show_lowest': True,
                 'ww_show_last_10': True, 'ww_show_character': True},
 }
@@ -83,4 +83,15 @@ def merge_settings(current, values, *, theme_resolver=resolve_theme):
                 except UnicodeEncodeError as error:
                     raise ValueError(f'{key} must contain valid Unicode text.') from error
         merged['overlay'].update(overlay)
+        after, during = 'auto_visibility', 'auto_visibility_during_races'
+        if after in overlay or during in overlay:
+            if overlay.get(after) and overlay.get(during):
+                raise ValueError('Choose only one automatic overlay visibility direction.')
+            # The two toggles are one preference. Older named sources that saved
+            # only the original toggle must not inherit a conflicting direction.
+            for key, opposite in ((after, during), (during, after)):
+                if overlay.get(opposite):
+                    merged['overlay'][key] = False
+                else:
+                    merged['overlay'].setdefault(key, False)
     return merged
