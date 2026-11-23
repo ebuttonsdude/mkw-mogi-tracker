@@ -800,6 +800,7 @@ def make_server(app, port=8765, host="127.0.0.1"):
                         course_images = app.course_images.pngs_for(race['course'] for race in snapshot['races'])
                         theme = app.theme_library.resolve(app.settings['theme'], internal=True)
                         report_font = app.settings['report_font']
+                        mogi_png_graph = app.settings['mogi_png_graph']
                         ffa = snapshot['session'].get('format') == 'ffa'
                         highlight_team_id = None if ffa else app.settings['overlay']['highlight_team_id']
                         highlight_player_id = app.settings['overlay']['highlight_player_id'] if ffa else None
@@ -832,7 +833,8 @@ def make_server(app, port=8765, host="127.0.0.1"):
                             content = render_folder_png(snapshot, path.split("/")[3], theme=theme,
                                                         font_library=app.font_library, report_font=report_font,
                                                         highlight_team_id=highlight_team_id, course_images=course_images,
-                                                        **({"highlight_player_id": highlight_player_id} if ffa else {}),
+                                                        **({'highlight_player_id': highlight_player_id} if ffa else
+                                                           {'mogi_png_graph': mogi_png_graph}),
                                                         highlight_session_id=highlight_session_id)
                     except RuntimeError as error:
                         raise ValueError(str(error)) from None

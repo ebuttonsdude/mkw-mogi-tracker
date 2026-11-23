@@ -198,6 +198,36 @@ class ReportTests(unittest.TestCase):
         self.assertEqual([team['id'] for team in series], ['b', 'a'])
         self.assertEqual([team['values'] for team in series], [[10, 25], [10, 25]])
 
+    def test_relative_team_series_uses_current_roster_and_unrounded_gross_share(self):
+        team = self.store.create_team('Trio')['id']
+        empty = self.store.create_team('No members')['id']
+        for i in range(3):
+            self.store.update_player(self.ids[i], f'Trio {i}', team)
+        self.score('one')
+        self.score('two')
+        self.store.correct_result('two', list(reversed(self.ids)))
+        self.store.add_penalty('two', self.ids[0], 5, 'Linked deduction')
+        self.store.create_race('pending', 'Rainbow Road')
+        self.score('four')
+
+        def values():
+            report = folder_report(self.store.snapshot(), self.folder)
+            return {row['id']: row['values'] for row in cumulative_team_series(report, relative=True)}
+
+        # The trio earns 37 then 6 with a 5-point deduction; its pace is 20.5/race.
+        self.assertEqual(values(), {team: [16.5, -3, None, None], empty: [0, 0, None, None],
+                                    None: [-16.5, -2, None, None]})
+        self.store.update_player(self.ids[2], 'Not on trio anymore', None)
+        self.assertAlmostEqual(values()[team][1], 25 - 2 * 82 * 2 / 12)
+
+    def test_relative_6v6_preserves_gaps_and_shows_subpar_race_falling(self):
+        report = {'players': [{'team_id': 'a'}] * 6 + [{'team_id': 'b'}] * 6,
+                  'races': [{'revision': 1}] * 4, 'teams': [
+                      {'id': 'a', 'name': 'Team A', 'races': [48, 38, 35, 49]},
+                      {'id': 'b', 'name': 'Team B', 'races': [34, 44, 47, 33]}]}
+        self.assertEqual([s['values'] for s in cumulative_team_series(report, relative=True)],
+                         [[7, 4, -2, 6], [-7, -4, 2, -6]])
+
     def test_scaled_bounds_zero_negative_and_large_totals(self):
         for values in ([], [None], [0, 0], [15, 27, 37], [-22, -5], [-123, 1340], [1340]):
             with self.subTest(values=values):
@@ -210,6 +240,8 @@ class ReportTests(unittest.TestCase):
                 self.assertTrue(all(a < b for a, b in zip(ticks, ticks[1:])))
                 self.assertLessEqual(len(ticks), 10)
         self.assertEqual(scaled_bounds([0]), (0, 5, [0, 1, 2, 3, 4, 5]))
+        for values in ([], [None], [0, 0]):
+            self.assertEqual(scaled_bounds(values, center_flat=True), (-1, 1, [-1, 0, 1]))
 
     def test_cumulative_recalculates_latest_revision_and_deleted_race(self):
         team = self.store.create_team('Pair')
@@ -266,6 +298,29 @@ class ReportTests(unittest.TestCase):
         with Image.open(BytesIO(payload)) as image:
             self.assertLessEqual(image.width, 1400)
             self.assertLessEqual(image.height, 1000)
+
+    def test_relative_png_switches_one_chart_only_and_ignores_ffa(self):
+        team = self.store.create_team('Solo')['id']
+        self.store.update_player(self.ids[0], 'Leader', team)
+        self.score()
+        state = self.store.snapshot()
+
+        def labels(mode):
+            with patch('mkw_tracker.reports._draw_text', autospec=True) as draw_text:
+                render_folder_png(state, self.folder, mogi_png_graph=mode)
+            return [call.args[2] for call in draw_text.call_args_list]
+
+        ordinary, relative = labels('cumulative'), labels('relative')
+        self.assertIn('Cumulative team net points', ordinary)
+        self.assertNotIn('Cumulative team net points', relative)
+        self.assertIn('Team points above/below average', relative)
+        self.assertIn('0 · average', relative)
+        self.assertTrue(any(label.startswith('+') for label in relative))
+        self.assertTrue(any(label.startswith('-') and label[1:].isdigit() for label in relative))
+        standings = 'Team standings · Players ranked overall · Net points'
+        self.assertEqual(ordinary[ordinary.index(standings):], relative[relative.index(standings):])
+        state['folders'][0]['format'] = 'ffa'
+        self.assertEqual(labels('relative'), labels('cumulative'))
 
     def test_png_grouped_members_overall_ranks_team_totals_and_theme(self):
         from PIL import Image

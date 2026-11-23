@@ -112,6 +112,7 @@ class ThemeSettingsTests(unittest.TestCase):
     def test_settings_validation_rejects_unknown_keys_wrong_types_and_ranges(self):
         bad = [{}, None, [], {'other': 1}, {'theme': 'unknown'}, {'standings_format': 'browser'},
                {'overlay': {}}, {'overlay': []}, {'overlay': {'other': True}}]
+        bad.extend({'mogi_png_graph': value} for value in ('both', None, [], True))
         for key, values in {
             'width': (True, 239, 1921, 500.5, '560'), 'height': (39, 2161, None),
             'font_size': (11, 49, True), 'scroll_speed': (4, 121, 1.5),
@@ -188,8 +189,11 @@ class ThemeSettingsTests(unittest.TestCase):
             try:
                 self.assertEqual(app.settings['standings_format'], 'md')
                 self.assertEqual(app.settings['theme'], 'mario')
+                self.assertEqual(app.settings['mogi_png_graph'], 'cumulative')
                 old = app.store.snapshot()
+                app.update_settings({'mogi_png_graph': 'relative'})
                 app.update_settings({'theme': 'rosalina', 'overlay': {'opacity': 0, 'layout': 'players'}})
+                self.assertEqual(app.settings['mogi_png_graph'], 'relative')
                 self.assertEqual(app.store.snapshot(), old)
                 saved = deepcopy(app.settings)
                 with patch.object(Path, 'replace', side_effect=OSError('test disk failure')):

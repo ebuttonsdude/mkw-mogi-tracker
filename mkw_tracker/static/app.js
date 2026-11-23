@@ -110,6 +110,7 @@ let settingsSignature = '';
 function renderSettings() {
   OverlaySources.render(state);
   renderFontSettings();
+  $('mogi-png-graph').value = state.settings?.mogi_png_graph || 'cumulative';
   $('yolo-mode').checked = !!state.settings?.yolo_mode;
   $('yolo-active').hidden = !state.settings?.yolo_mode || state.tracker_mode === 'ww';
   const theme = state.theme;
@@ -1306,6 +1307,15 @@ $('font-reset').addEventListener('click', async () => {
   } catch (error) { message(error.message, true); }
 });
 reloadFonts().catch(error => message(error.message, true));
+$('mogi-png-graph').addEventListener('change', (event) => {
+  const select = event.currentTarget;
+  run(select, async () => {
+    try {
+      await api('/api/settings', 'PATCH', {mogi_png_graph: select.value});
+      await refresh(false, true); message('Mogi Teams PNG graph saved.');
+    } catch (error) { select.value = state.settings?.mogi_png_graph || 'cumulative'; throw error; }
+  });
+});
 $('standings-format').addEventListener('change', () => run($('standings-format'), async () => {
   try { await api('/api/settings', 'PATCH', {standings_format: $('standings-format').value}); await refresh(); message('Standings format saved. Update the OBS text source file path to the path shown in Standings.'); }
   catch (error) { $('standings-format').value = state.settings?.standings_format || 'txt'; throw error; }

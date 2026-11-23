@@ -8,7 +8,7 @@ from .report_fonts import valid_font_id
 
 DEFAULT_SETTINGS = {
     'yolo_mode': False,
-    'standings_format': 'txt', 'theme': 'mario', 'report_font': '',
+    'standings_format': 'txt', 'theme': 'mario', 'report_font': '', 'mogi_png_graph': 'cumulative',
     'overlay': {'layout': 'teams', 'width': 560, 'height': 600, 'font_size': 22,
                 'opacity': .85, 'show_header': True, 'show_players': True,
                 'show_gaps': True, 'animate': True, 'scroll': True,
@@ -23,7 +23,8 @@ DEFAULT_SETTINGS = {
 
 def merge_settings(current, values, *, theme_resolver=resolve_theme):
     if not isinstance(values, dict) or not values or not set(values) <= set(DEFAULT_SETTINGS):
-        raise ValueError('Provide valid display settings: standings_format, theme, report_font, overlay or yolo_mode.')
+        raise ValueError('Provide valid display settings: standings_format, theme, report_font, '
+                         'mogi_png_graph, overlay or yolo_mode.')
     merged = deepcopy(current)
     if 'yolo_mode' in values:
         if type(values['yolo_mode']) is not bool:
@@ -33,6 +34,10 @@ def merge_settings(current, values, *, theme_resolver=resolve_theme):
         if values['standings_format'] not in ('txt', 'md'):
             raise ValueError('standings_format must be txt or md')
         merged['standings_format'] = values['standings_format']
+    if 'mogi_png_graph' in values:
+        if values['mogi_png_graph'] not in ('cumulative', 'relative'):
+            raise ValueError('mogi_png_graph must be cumulative or relative.')
+        merged['mogi_png_graph'] = values['mogi_png_graph']
     if 'theme' in values:
         theme_resolver(values['theme'])
         merged['theme'] = values['theme']

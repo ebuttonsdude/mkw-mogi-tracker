@@ -1,5 +1,6 @@
 """Local, review-aware folder reports and the OBS plaintext scoreboard."""
 
+from collections import Counter
 from io import BytesIO
 from math import ceil, floor, log10
 import os
@@ -7,6 +8,7 @@ from pathlib import Path
 from struct import error as StructError
 import sys
 
+from .store import POINTS
 from .themes import resolve_theme, team_color_map
 from .report_fonts import (draw_text as _draw_text, _font_codepoints, FontLibrary, FontStack, text_clusters)
 
@@ -226,12 +228,14 @@ def _font(ImageFont, size):
                        f'{detail} Fonts are never downloaded during export.')
 
 
-def cumulative_team_series(report):
+def cumulative_team_series(report, *, relative=False):
     """Net team prefix sums; a pending race makes its entire later prefix unknown.
 
     A team's absence in a confirmed race contributes zero. Deductions have already
     been applied to team race cells by folder_report, at their linked race.
+    Relative values subtract the current roster's share of gross room points.
     """
+    team_sizes = Counter(player['team_id'] for player in report['players']) if relative else {}
     series = []
     for team in report['teams']:
         running, blocked, values = 0, False, []
@@ -241,7 +245,11 @@ def cumulative_team_series(report):
                 values.append(None)
             else:
                 running += team['races'][index] or 0
-                values.append(running)
+                if relative:
+                    expected = (index + 1) * sum(POINTS) * team_sizes[team['id']] / len(POINTS)
+                    values.append(running - expected)
+                else:
+                    values.append(running)
         series.append({'id': team['id'], 'name': team['name'], 'values': values})
     return series
 
@@ -263,11 +271,13 @@ def cumulative_player_series(report):
     return series
 
 
-def scaled_bounds(values):
+def scaled_bounds(values, *, center_flat=False):
     """Return inclusive zero-aware (lower, upper, ticks) with nice integer steps."""
     known = [value for value in values if value is not None]
     low, high = min([0, *known]), max([0, *known])
     if low == high:
+        if center_flat:
+            return -1, 1, [-1, 0, 1]
         return 0, 5, list(range(6))
     padding = (high - low) * .05
     padded_low = low - padding if low < 0 else 0
@@ -284,7 +294,7 @@ def scaled_bounds(values):
 
 def render_folder_png(snapshot, folder_id, theme='mario', *, highlight_team_id=None,
                       highlight_session_id=None, highlight_player_id=None, font_library=None, report_font="",
-                      course_images=None):
+                      course_images=None, mogi_png_graph='cumulative'):
     """Themed net-point chart and standings for the folder's saved format."""
     try:
         from PIL import Image, ImageColor, ImageDraw, ImageFont
@@ -358,26 +368,36 @@ def render_folder_png(snapshot, folder_id, theme='mario', *, highlight_team_id=N
             if (column + row) % 2 == 0:
                 rectangle((column * 12, bar_height + row * 6,
                            column * 12 + 12, bar_height + row * 6 + 6), tokens['line'])
-    chart_title = 'Cumulative player net points' if is_ffa else 'Cumulative team net points'
+    relative = not is_ffa and mogi_png_graph == 'relative'
+    if is_ffa:
+        chart_title = 'Cumulative player net points'
+        series = cumulative_player_series(report)
+    else:
+        chart_title = 'Team points above/below average' if relative else 'Cumulative team net points'
+        series = cumulative_team_series(report, relative=relative)
     y = text(chart_title, 24, bar_height + 24, width - 48, heading)
     if report['pending_races']:
         y = text('Pending race stops all later cumulative totals.', 24, y, width - 48, small, tokens['warning'])
     if report['penalty_points']:
         y = text(f"Net {report['net_points']} pts after {report['penalty_points']} pts in deductions.",
                  24, y, width - 48, small, tokens['muted'])
-    series = cumulative_player_series(report) if is_ffa else cumulative_team_series(report)
-    lower, upper, ticks = scaled_bounds(value for team in series for value in team['values'])
-    left = max(56, ceil(max(small.getlength(str(tick)) for tick in ticks)) + 32)
+    lower, upper, ticks = scaled_bounds((value for team in series for value in team['values']),
+                                        center_flat=relative)
+    tick_labels = ([f'{tick:+d}' if tick else '0 · average' for tick in ticks]
+                   if relative else [str(tick) for tick in ticks])
+    left = max(56, ceil(max(small.getlength(label) for label in tick_labels)) + 32)
     right, top, bottom = width - 28, y + 12, y + 266
     spacing = (right - left) / max(count, 1)
 
     def point(index, value):
         return (left + spacing * (index + .5), bottom - (value - lower) * (bottom - top) / (upper - lower))
 
-    for tick in ticks:
+    for tick, label in zip(ticks, tick_labels):
         ordinate = point(0, tick)[1]
-        operations.append(('line', [(left, ordinate), (right, ordinate)], tokens['line'], 1))
-        text(tick, 12, ordinate - 9, left - 20, small, tokens['muted'])
+        baseline = relative and tick == 0
+        operations.append(('line', [(left, ordinate), (right, ordinate)],
+                           tokens['muted'] if baseline else tokens['line'], 2 if baseline else 1))
+        text(label, 12, ordinate - 9, left - 20, small, tokens['muted'])
     for team in series:
         color = colors[team['id']]
         coords = [point(race_index, value) for race_index, value in enumerate(team['values'])

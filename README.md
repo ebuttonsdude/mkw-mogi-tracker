@@ -168,6 +168,8 @@ In **Timestamps**, choose the recording by session folder, select **Plain text (
 
 In **Race history**, use **Race order (editable)** to drag a race within its folder or choose **Move up** / **Move down**. The next folder PNG uses that sequence for its race labels, results and charts.
 
+For a Mogi Teams PNG, **Settings → Mogi Teams PNG graph** lets you choose **Cumulative net points** (default) or **Points above/below average**. In the second view, zero is average pace for a team of that size. A rising line means the team beat that pace in the race, even if it is still below zero. Only the graph changes; the standings keep their actual net scores.
+
 **Experimental YOLO mode:** Settings → Experimental can automatically confirm future Mogi results, including incomplete detections. It is off by default and requires accepting a warning. Missing players become distinct `not-detected-fixme` entries. [Read the risks and controls](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#experimental-yolo-mode) before enabling it.
 
 **Course pictures:** upload your own local thumbnails under **Settings → Course pictures**, or activate them with the migrator, including the old tracker’s coded track filenames. [Upload guidance and a suggested download prompt](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#course-pictures). No course artwork is bundled.

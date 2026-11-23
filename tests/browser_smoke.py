@@ -165,6 +165,17 @@ def main():
                     page.set_viewport_size({"width": 1440, "height": 1000})
                     page.locator(f"#{form_id} select[name=name_engine]").select_option("auto")
                 tab("Settings")
+                page.locator("#mogi-png-details > summary").click()
+                graph = page.get_by_label("Graph style", exact=True)
+                expect(graph).to_have_value("cumulative")
+                graph.select_option("relative")
+                expect(page.locator("#message")).to_have_text("Mogi Teams PNG graph saved.")
+                page.reload()
+                page.locator("#mogi-png-details > summary").click()
+                expect(graph).to_have_value("relative")
+                graph.select_option("cumulative")
+                expect(page.locator("#message")).to_have_text("Mogi Teams PNG graph saved.")
+                page.locator("#mogi-png-details > summary").click()
                 expect(page.locator("#character-theme option")).to_have_count(51)
                 theme_names = page.locator("#character-theme option").all_text_contents()[1:]
                 assert theme_names == sorted(theme_names, key=str.casefold), theme_names
