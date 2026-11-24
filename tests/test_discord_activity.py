@@ -35,11 +35,23 @@ class DiscordActivityTests(unittest.TestCase):
     def test_team_ties_and_pending(self):
         result = build_activity('mogi', self.snapshot(), {'highlight_team_id': 't'})
         self.assertEqual(result['details'], 'Mogi Teams · 1 race')
-        self.assertEqual(result['state'], 'Team Position #1 · 30 pts · Leading')
+        self.assertEqual(result['state'], 'Team Position #1 · 30 pts · No other teams')
         snapshot = self.snapshot()
         snapshot['teams'].append({'id': 'tie', 'name': 'Tie', 'points': 30})
         self.assertEqual(build_activity('mogi', snapshot, {'highlight_team_id': 't'})['state'],
-                         'Team Position #1 · 30 pts · Leading')
+                         'Team Position #1 · 30 pts · Tied for #1 · 0 pts gap')
+
+    def test_leader_shows_margin_over_second(self):
+        snapshot = self.snapshot()
+        snapshot['teams'] += [{'id': 'second', 'name': 'Second', 'points': 18},
+                              {'id': 'third', 'name': 'Third', 'points': 10}]
+        result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
+        self.assertEqual(result['state'], 'Team Position #1 · 30 pts · 12 pts ahead of #2')
+        snapshot['teams'][0]['points'] = -5
+        snapshot['teams'][1]['points'] = -20
+        snapshot['teams'][2]['points'] = -30
+        self.assertEqual(build_activity('mogi', snapshot, {'highlight_team_id': 't'})['state'],
+                         'Team Position #1 · -5 pts · 15 pts ahead of #2')
 
     def test_team_gap_uses_net_points_and_competition_positions(self):
         snapshot = self.snapshot()

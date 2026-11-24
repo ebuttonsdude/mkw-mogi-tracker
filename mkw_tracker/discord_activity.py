@@ -57,7 +57,14 @@ def build_activity(mode, snapshot, overlay_settings, *, current_course=None, lou
                     previous = min(above, key=lambda t: t['points'])
                     gap = f"{previous['points'] - team['points']} pts to #{_rank(previous, teams)}"
                 else:
-                    gap = 'Leading'
+                    others = [t for t in teams if t['id'] != team['id']]
+                    if not others:
+                        gap = 'No other teams'
+                    else:
+                        runner_up = max(others, key=lambda t: t['points'])
+                        lead = team['points'] - runner_up['points']
+                        gap = (f'{lead} pts ahead of #2' if lead
+                               else 'Tied for #1 · 0 pts gap')
                 state = f"Team Position #{_rank(team, teams)} · {team['points']} pts · {gap}"
     return {'details': _text(details), 'state': _text(state),
             'assets': {'large_image': CONKDOR_IMAGE_URL, 'large_text': 'Conkdor'}}

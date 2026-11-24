@@ -207,7 +207,7 @@ Open **Settings → Discord Rich Presence**, directly below **Make it yours**, t
 
 The tracker includes its public application ID: **enable the checkbox and save**. No developer setup is needed. For an optional custom application, expand **Advanced: custom application**. To obtain your own ID, open the [Discord Developer Portal](https://discord.com/developers/applications), choose **New Application**, give it a display name such as **MKW Mogi Tracker**, then copy **Application ID** from **General Information**. Paste that ID into the tracker, enable the checkbox and save. Do not enter a bot token or client secret; neither is needed. The application name is the name Discord displays.
 
-- **Mogi Teams:** confirmed race count, highlighted team’s net points and position, and points needed to reach the next higher-scoring team (for example, **42 pts to #1**). First place shows “Leading”; tied teams share a competition position.
+- **Mogi Teams:** confirmed race count, highlighted team’s net points and position, and points needed to reach the next higher-scoring team (for example, **42 pts to #1**). A sole leader shows its margin over second (for example, **12 pts ahead of #2**). Joint leaders show **Tied for #1 · 0 pts gap**; a lone team shows **No other teams**. Tied teams share a competition position.
 - **Mogi FFA:** confirmed race count, highlighted player's points/position and Lounge division if already cached with an unambiguous exact name. This does not initiate Lounge requests.
 - **Worldwides:** last-ten VR change, current/next race number and known current capture course, plus the last recorded race's gain/loss. Missing changes remain unknown.
 
