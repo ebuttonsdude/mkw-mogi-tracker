@@ -262,6 +262,7 @@
     if (nextSignature === signature) return;
     signature = nextSignature;
     const tokens = data.theme?.tokens || {};
+    window.updateThemeFavicon(data.theme);
     for (const key of ['text', 'muted', 'accent']) {
       if (tokens[key] && CSS.supports('color', tokens[key])) overlay.style.setProperty(`--${key}`, tokens[key]);
     }

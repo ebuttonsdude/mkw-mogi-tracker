@@ -136,7 +136,7 @@ Use neutral system sans-serif on dashboard controls. Settings → Overlay & PNG 
 
 The browser loads the chosen file through the same-origin allowlisted font endpoint with swap behavior and retains native Unicode fallback. PNGs measure and draw identical fallback runs on a shared baseline. Combining marks, variation selectors, emoji modifiers, flag pairs and joined sequences stay intact during font fallback and wrapping. Missing glyphs fall back to installed fonts; if no font covers a sequence, preserve the text and its missing-glyph marker rather than dropping a name or aborting the export. Font coverage is checked before opening native faces. Per-size face/source caches and the shared digest-only coverage cache have bounded residency; oversized fonts remain transient without splitting shaping runs. These cache budgets are not native-RSS guarantees. Fonts are never bundled or downloaded. Local font binaries remain runtime data; the API excludes filesystem paths and rejects traversal/symlink escapes.
 
-A saved theme may include a user-supplied icon shown consistently in dashboard, overlay and PNG headers. Without an icon, hide its slot cleanly. Course names remain visible text; optional user-uploaded local thumbnails must not replace the labels. Respect reduced motion.
+A saved theme may include a user-supplied icon shown consistently in dashboard, overlay and PNG headers. Without an icon, hide its slot cleanly. Dashboard and overlay tab favicons follow the saved theme (including icon replacement/removal), not editor drafts. Serve the existing normalized uploaded PNG or an original theme-colored SVG podium from the Host-checked, no-store favicon endpoint; version its URL only when the icon or fallback palette changes. No artwork is bundled or fetched externally. Course names remain visible text; optional user-uploaded local thumbnails must not replace the labels. Respect reduced motion.
 
 ## Components
 
@@ -349,7 +349,7 @@ at 2 MiB per file. Only fixed events, bounded numeric metrics and safe failure
 categories are logged; no raw exceptions, URLs, headers, credentials, image/name
 payloads or recording paths. Raw worker stderr is discarded rather than appended to unbounded engine logs.
 Root and third-party loggers are not reconfigured.
-Existing dashboard operation errors remain unchanged. Demo logs are temporary.
+Missing-resource 404s retain warnings but use a distinct not-found event, not origin-rejection guidance. The browser favicon request succeeds even for icon-free themes. Existing dashboard operation errors remain unchanged. Demo logs are temporary.
 
 ## Credential-free session backups
 

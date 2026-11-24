@@ -641,7 +641,9 @@ def make_server(app, port=8765, host="127.0.0.1"):
             # Status only: never request targets, headers, bodies or addresses.
             if type(code) is int:
                 log_event('http', 'response', status=code)
-                if 400 <= code < 500:
+                if code == 404:
+                    log_event('http', 'not_found', status=code)
+                elif 400 <= code < 500:
                     log_event('http', 'rejected', status=code)
 
         def handle(self):
@@ -763,7 +765,21 @@ def make_server(app, port=8765, host="127.0.0.1"):
                     raise PermissionError("Invalid Host header")
                 parsed = urlsplit(self.path)
                 path = unquote(parsed.path)
-                if path == "/api/state":
+                if path == "/favicon.ico":
+                    with app.lock:
+                        identifier = parse_qs(parsed.query).get('theme', [app.settings['theme']])[0]
+                        theme = app.theme_library.resolve(identifier, internal=True)
+                    if theme.get('icon_png'):
+                        self._send(200, theme['icon_png'], 'image/png')
+                    else:
+                        # Original podium glyph; only validated palette colors enter SVG.
+                        tokens = theme['tokens']
+                        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+                               f'<rect width="32" height="32" rx="7" fill="{tokens["panel"]}"/>'
+                               f'<path d="M5 17h6v10H5zM13 7h6v20h-6zM21 21h6v6h-6z" '
+                               f'fill="{tokens["accent"]}"/></svg>')
+                        self._send(200, svg.encode('utf-8'), 'image/svg+xml')
+                elif path == "/api/state":
                     with app.lock:
                         snapshot = app.snapshot()
                     self._send(200, snapshot)
@@ -896,7 +912,7 @@ def make_server(app, port=8765, host="127.0.0.1"):
                         app.overlay_profiles.get(path.rsplit('/', 1)[1])
                     self._send(200, (STATIC / 'overlay.html').read_bytes(), 'text/html; charset=utf-8', frameable=True)
                 elif path in {"/", "/license", "/overlay", "/overlay.js", "/overlay.css", "/static/app.js", "/static/style.css",
-                              "/static/ww.js", "/static/fonts.js", "/static/overlay-profiles.js"}:
+                              "/static/ww.js", "/static/fonts.js", "/static/favicon.js", "/static/overlay-profiles.js"}:
                     name = {"/": "index.html", "/license": "legal.html", "/overlay": "overlay.html"}.get(path, path.rsplit("/", 1)[1])
                     target = STATIC / name
                     content_type = mimetypes.guess_type(name)[0] or "application/octet-stream"

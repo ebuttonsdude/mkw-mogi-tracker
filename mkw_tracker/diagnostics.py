@@ -28,6 +28,7 @@ EVENTS = {
         'listening': (logging.INFO, 'Dashboard listener ready'),
         'bind_failed': (logging.ERROR, 'Cannot listen; check the bind address and whether the port is already in use'),
         'response': (logging.DEBUG, 'HTTP response'),
+        'not_found': (logging.WARNING, 'HTTP resource not found; a requested page, file or record is unavailable'),
         'rejected': (logging.WARNING, 'HTTP request rejected; check the dashboard action and local origin'),
         'failed': (logging.ERROR, 'HTTP operation failed; check data-folder access and installed dependencies'),
         'disconnected': (logging.DEBUG, 'HTTP client disconnected or timed out'),

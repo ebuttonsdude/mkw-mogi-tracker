@@ -119,6 +119,7 @@ function renderSettings() {
   $('yolo-mode').checked = !!state.settings?.yolo_mode;
   $('yolo-active').hidden = !state.settings?.yolo_mode || state.tracker_mode === 'ww';
   const theme = state.theme;
+  window.updateThemeFavicon(theme);
   if (theme?.tokens) {
     Object.entries(theme.tokens).forEach(([key, value]) => document.documentElement.style.setProperty(`--${key.replaceAll('_', '-')}`, value));
     for (const [alias, key] of [['teal', 'accent'], ['red', 'danger'], ['amber', 'warning']]) document.documentElement.style.setProperty(`--${alias}`, theme.tokens[key]);

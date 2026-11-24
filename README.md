@@ -205,6 +205,8 @@ Logs are in **`.local/tracker/logs/`** by default, or **`<data-dir>/logs/`** whe
 
 Each file rotates at **2 MiB**, keeping **three backups** (`.log.1`–`.log.3`): about **48 MiB** total for six components. Inactive components may have empty files. Demo logs are temporary and removed on exit.
 
+Browser tabs use the saved theme’s uploaded icon, or a small podium in its palette when no icon is set. The favicon updates with theme changes. Missing resources log “HTTP resource not found”; a 404 alone does not indicate an origin/security rejection.
+
 Diagnostics omit passwords, tokens, request headers/bodies, screenshots, player names, recording paths and raw exception text. HTTP diagnostics use status codes rather than URLs. Raw model-worker stderr is discarded. Existing `.local/logs/*-ocr.log` files are not deleted; review those separately before sharing. Logs are local runtime data, excluded from Git and application packages. Review any files before sharing them; dashboard capture/import status messages remain available for more specific operation errors.
 
 To move an existing installation, run `.venv/bin/python -m mkw_tracker.migrate "/path/to/mkw-livesplit-vos"`. The terminal menu shows category counts and size estimates, offers **select everything**, and asks for confirmation before importing. Local migration is separate from web ZIP backup limits. See the [migration guide](https://ebuttonsdude.github.io/mkw-mogi-tracker/migrator/).

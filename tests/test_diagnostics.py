@@ -279,6 +279,41 @@ class DiagnosticIntegrationTests(DiagnosticHelpers, unittest.TestCase):
         self.assertIn('recognition_ms=', text)
         self.assertNotIn(SECRET, text)
 
+    def test_browser_favicon_is_themed_and_quiet_but_still_checks_host(self):
+        self.configure()
+        app = Application(':memory:', self.root)
+        self.addCleanup(app.close)
+        server = make_server(app, 0)
+        worker = threading.Thread(target=server.serve_forever, kwargs={'poll_interval': .01})
+        worker.start()
+        try:
+            connection = http.client.HTTPConnection(*server.server_address, timeout=5)
+            try:
+                for target in ('/favicon.ico', '/favicon.ico?token=private-icon-query'):
+                    connection.request('GET', target)
+                    response = connection.getresponse()
+                    with response:
+                        body = response.read()
+                        self.assertEqual(response.status, 200)
+                        self.assertEqual(response.getheader('Content-Type'), 'image/svg+xml')
+                        self.assertIn(b'<svg', body)
+                        self.assertIn(app.theme_library.resolve(app.settings['theme'])['tokens']['accent'].encode(), body)
+                self.assertEqual(self.stdout.getvalue(), '')
+                self.assertEqual(self.read('http'), '')
+                connection.request('GET', '/favicon.ico', headers={'Host': 'untrusted.invalid'})
+                response = connection.getresponse()
+                self.assertEqual(response.status, 403)
+                response.read()
+            finally:
+                connection.close()
+        finally:
+            server.shutdown()
+            worker.join(5)
+            server.server_close()
+        self.assertIn('HTTP request rejected', self.stdout.getvalue())
+        self.assertIn('status=403', self.stdout.getvalue())
+        self.assertNotIn('private-icon-query', self.read('http'))
+
     def test_http_status_and_internal_failure_do_not_log_request_payloads(self):
         self.configure(verbose=True)
         app = Application(':memory:', self.root)
@@ -311,6 +346,8 @@ class DiagnosticIntegrationTests(DiagnosticHelpers, unittest.TestCase):
             server.server_close()
         text = self.read('http') + self.stdout.getvalue()
         self.assertIn('status=404', text)
+        self.assertIn('HTTP resource not found', text)
+        self.assertNotIn('HTTP request rejected', text)
         self.assertIn('status=500', text)
         self.assertIn('HTTP operation failed', text)
         for private in (SECRET, 'secret-query', 'private-recording', 'private-header', 'private-client'):

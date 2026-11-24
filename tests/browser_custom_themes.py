@@ -1,8 +1,10 @@
 """Custom theme acceptance using synthetic images and temporary application data."""
 from io import BytesIO
 from pathlib import Path
+import re
 import tempfile
 import threading
+from urllib.parse import urljoin
 
 from mkw_tracker.server import Application, make_server
 
@@ -10,6 +12,21 @@ from mkw_tracker.server import Application, make_server
 def main():
     from PIL import Image
     from playwright.sync_api import expect, sync_playwright
+
+    def favicon(page, theme_id, content_type):
+        link = page.locator('#theme-favicon')
+        expect(link).to_have_attribute('rel', 'icon')
+        expect(link).to_have_attribute('href', re.compile(r'^/favicon\.ico\?theme=' + re.escape(theme_id) + r'&v=.+'))
+        href = link.get_attribute('href')
+        response = page.request.get(urljoin(page.url, href))
+        assert response.status == 200
+        assert response.headers['content-type'].split(';')[0] == content_type
+        body = response.body()
+        if content_type == 'image/png':
+            assert body.startswith(b'\x89PNG')
+        else:
+            assert b'<svg' in body
+        return href, body
 
     with tempfile.TemporaryDirectory() as temporary:
         directory = Path(temporary)
@@ -31,6 +48,10 @@ def main():
                 # Built-in theme controls are unavailable, not busy: polling must redraw.
                 expect(page.locator('#tracker-mode')).to_have_value('mogi')
                 expect(page.locator('#theme-update')).to_be_disabled()
+                initial_favicon, _ = favicon(page, 'mario', 'image/svg+xml')
+                overlay = browser.new_page()
+                overlay.goto(base + '/overlay')
+                assert favicon(overlay, 'mario', 'image/svg+xml')[0] == initial_favicon
                 with app.lock:
                     players = [app.store.add_player(f'Player {index}')['id'] for index in range(12)]
                     app.store.create_race('background-race', 'Course')
@@ -78,11 +99,14 @@ def main():
                 expect(page.locator('#character-portrait')).to_be_visible()
                 custom_id = page.locator('#character-theme').input_value()
                 assert custom_id != 'mario'
+                uploaded_favicon, uploaded_body = favicon(page, custom_id, 'image/png')
+                assert favicon(overlay, custom_id, 'image/png') == (uploaded_favicon, uploaded_body)
                 expect(page.locator('#theme-update')).to_be_enabled()
                 expect(page.locator('#theme-delete')).to_be_enabled()
                 page.reload()
                 expect(page.locator('#character-theme')).to_have_value(custom_id)
                 expect(page.locator('#character-portrait')).to_be_visible()
+                assert favicon(page, custom_id, 'image/png') == (uploaded_favicon, uploaded_body)
                 with app.lock:
                     theme = app.theme_library.resolve(custom_id)
                     assert theme['tokens']['accent'] == '#123456'
@@ -91,8 +115,6 @@ def main():
                 image_response = page.request.get(base + f'/api/folders/{folder_id}/report.png')
                 assert image_response.status == 200, image_response.text()
                 assert image_response.body().startswith(b'\x89PNG')
-                overlay = browser.new_page()
-                overlay.goto(base + '/overlay')
                 expect(overlay.locator('.overlay-character')).to_be_visible()
                 expect(overlay.locator('.overlay-character')).to_have_attribute('alt', 'Ocean 日本 icon')
                 page.locator('#custom-theme-editor summary').click()
@@ -105,15 +127,35 @@ def main():
                 expect(page.locator('#character-theme')).to_have_value(custom_id)
                 with app.lock:
                     assert app.theme_library.resolve(custom_id)['name'] == 'Ocean updated'
+                # Replacing the image under the same theme ID must invalidate its favicon URL.
+                replacement = BytesIO()
+                Image.new('RGB', (64, 64), '#c06020').save(replacement, format='PNG')
+                page.locator('#custom-theme-image').set_input_files({
+                    'name': 'replacement.png', 'mimeType': 'image/png', 'buffer': replacement.getvalue()})
+                expect(page.locator('#theme-editor-status')).to_contain_text('Image added')
+                page.locator('#theme-update').click()
+                expect(page.locator('#theme-editor-status')).to_contain_text('Theme and icon saved')
+                expect(page.locator('#theme-favicon')).not_to_have_attribute('href', uploaded_favicon)
+                replacement_favicon, replacement_body = favicon(page, custom_id, 'image/png')
+                assert replacement_body != uploaded_body
+                expect(overlay.locator('#theme-favicon')).to_have_attribute('href', replacement_favicon)
+                assert favicon(overlay, custom_id, 'image/png')[1] == replacement_body
                 page.set_viewport_size({'width': 390, 'height': 844})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 # Explicit image removal retains the custom palette and is persisted.
                 page.locator('#theme-remove-icon').click()
                 page.locator('#theme-update').click()
                 expect(page.locator('#character-portrait')).to_be_hidden()
+                expect(page.locator('#theme-favicon')).not_to_have_attribute('href', replacement_favicon)
+                fallback_favicon, fallback_body = favicon(page, custom_id, 'image/svg+xml')
+                assert b'#123456' in fallback_body
+                expect(overlay.locator('#theme-favicon')).to_have_attribute('href', fallback_favicon)
+                assert favicon(overlay, custom_id, 'image/svg+xml')[1] == fallback_body
                 page.locator('#theme-delete').click()
                 expect(page.locator('#theme-editor-status')).to_contain_text('Saved theme deleted')
                 expect(page.locator('#character-theme')).to_have_value('mario')
+                assert favicon(page, 'mario', 'image/svg+xml')[0] == initial_favicon
+                assert favicon(overlay, 'mario', 'image/svg+xml')[0] == initial_favicon
                 with app.lock:
                     assert not any(t['id'] == custom_id for t in app.theme_library.themes())
                 # Delay a save while users submit twice and keep editing the draft.
@@ -163,7 +205,7 @@ def main():
             assert restarted.settings['theme'] == 'mario'
         finally:
             restarted.close()
-    print('PASS: custom icon upload, editable suggestions, theme persistence/update/delete, overlay/PNG and mobile layout.')
+    print('PASS: custom icon upload, editable suggestions, theme persistence/update/delete, live dashboard/overlay favicons, PNG and mobile layout.')
 
 
 if __name__ == '__main__':
