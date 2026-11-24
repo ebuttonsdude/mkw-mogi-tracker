@@ -26,6 +26,7 @@ if [[ $job == checks ]]; then
   cd dist
   tar -cf - mkw_mogi_tracker-*.whl mkw_mogi_tracker-*.tar.gz >&3
 else
+  .venv/bin/python -W error::ResourceWarning -m tests.browser_discord
   .venv/bin/python -W error::ResourceWarning -m tests.browser_smoke
   .venv/bin/python -W error::ResourceWarning -m tests.browser_overlay
   .venv/bin/python -W error::ResourceWarning -m tests.browser_overlay_motion

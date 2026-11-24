@@ -200,3 +200,17 @@ For an AI assistant with browsing and file-download tools, adapt this prompt and
 > Find and download Mario Kart World course thumbnails from publicly accessible sources that permit me to save them for personal use. Use this exact course list: [paste course names]. Prefer PNG, or keep the original JPEG/WebP extension; do not rename another file format to PNG. Name each file after its exact course name, preserve aspect ratio, and save the files in a separate local folder. Do not guess missing course numbers or substitute courses from another game. Record each image's source link in a sources.txt file. Respect source-site terms and access restrictions. Do not alter my tracker repository, commit, publish or redistribute the images. Report any missing pictures for me to review.
 
 Review the downloaded files and their course assignments before uploading. The tracker does not download pictures itself, and no course artwork is distributed with it.
+
+## Discord Rich Presence
+
+Open **Settings → Discord Rich Presence**, directly below **Make it yours**, to opt in. This shares your mode, race statistics and highlighted names with people who can see your Discord activity. It is off by default; your choice and public Application ID are saved for next launch. Discord's **desktop app** must be running and allow activity sharing; the web client is not enough.
+
+The tracker includes its public application ID: **enable the checkbox and save**. No developer setup is needed. For an optional custom application, expand **Advanced: custom application**. To obtain your own ID, open the [Discord Developer Portal](https://discord.com/developers/applications), choose **New Application**, give it a display name such as **MKW Mogi Tracker**, then copy **Application ID** from **General Information**. Paste that ID into the tracker, enable the checkbox and save. Do not enter a bot token or client secret; neither is needed. The application name is the name Discord displays.
+
+- **Mogi Teams:** confirmed race count, highlighted team’s net points and position, and points needed to reach the next higher-scoring team (for example, **42 pts to #1**). A sole leader shows its margin over second (for example, **12 pts ahead of #2**). Joint leaders show **Tied for #1 · 0 pts gap**; a lone team shows **No other teams**. Tied teams share a competition position.
+- **Mogi FFA:** confirmed race count, highlighted player's points/position and Lounge division if already cached with an unambiguous exact name. This does not initiate Lounge requests.
+- **Worldwides:** last-ten VR change, current/next race number and known current capture course, plus the last recorded race's gain/loss. Missing changes remain unknown.
+
+Mogi uses the **main overlay's highlight**, not a named source's override. Pending races never add points. Long names are shortened because Discord limits status text. Discord controls the card size and provides two content rows; Teams shows a compact summary labeled Team Position rather than the team name or member-by-member scores. Updates can take about 15 seconds. “Waiting for Discord desktop” means scoring remains available while the connection retries. Disable and save to clear the activity; clearing is best-effort if Discord has disconnected.
+
+Discord uses a fixed public square Conkdor head icon, not your locally uploaded theme icon. Your custom pictures stay local. Discord retrieves the image from its public host; it may be missing or delayed if that host or Discord’s image cache is unavailable.
