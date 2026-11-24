@@ -20,8 +20,7 @@ def _change(value):
 def build_activity(mode, snapshot, overlay_settings, *, current_course=None, lounge_rank=None):
     """No I/O or inferred identity; ranks are competition ranks of net points.
 
-    Discord's two text fields cannot fit arbitrarily large teams. Member names
-    are shortened first and any remaining overflow is explicitly counted.
+    Teams use a compact net-score summary rather than a crowded member list.
     """
     session_id = snapshot['session']['id']
     races = [r for r in snapshot['races'] if r['session_id'] == session_id]
@@ -45,18 +44,14 @@ def build_activity(mode, snapshot, overlay_settings, *, current_course=None, lou
                     state += f' | Lounge: {_text(lounge_rank, 30)}'
         else:
             team = next((t for t in teams if t['id'] == overlay_settings.get('highlight_team_id')), None)
-            details = f'Mogi Teams | {count} races scored'
+            details = f"Mogi Teams · {count} {'race' if count == 1 else 'races'}"
             state = 'No team highlighted'
             if team:
-                details += f" | {_text(team['name'], 35)} #{_rank(team, teams)}"
-                members = [p for p in players if p.get('team_id') == team['id']]
-                parts = [f"{_text(p['name'], 16)} {p['points']}pts #{_rank(p, players)}" for p in members]
-                state = 'No team members'
-                for visible in range(len(parts), 0, -1):
-                    candidate = ' | '.join(parts[:visible])
-                    if visible < len(parts):
-                        candidate += f' | +{len(parts) - visible} members'
-                    if len(candidate.encode('utf-8')) <= 128:
-                        state = candidate
-                        break
+                above = [t for t in teams if t['points'] > team['points']]
+                if above:
+                    previous = min(above, key=lambda t: t['points'])
+                    gap = f"{team['points'] - previous['points']:+d} to #{_rank(previous, teams)}"
+                else:
+                    gap = 'Leading'
+                state = f"{_text(team['name'], 24)} #{_rank(team, teams)} · {team['points']} pts · {gap}"
     return {'details': _text(details), 'state': _text(state)}

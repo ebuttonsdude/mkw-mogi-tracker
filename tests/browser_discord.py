@@ -24,7 +24,12 @@ def main():
                 page = browser.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(f'http://127.0.0.1:{server.server_address[1]}')
+                for tab in ('standings', 'capture', 'videos', 'history', 'chapters', 'overlays'):
+                    page.locator(f'#tab-{tab}').click()
+                    expect(page.locator('#discord-section')).to_be_hidden()
                 page.locator('#tab-settings').click()
+                expect(page.locator('#discord-section')).to_be_visible()
+                assert page.evaluate("() => document.querySelector('#settings-section').nextElementSibling.id === 'discord-section'")
                 page.locator('#discord-section > summary').click()
                 expect(page.locator('#discord-enabled')).not_to_be_checked()
                 page.get_by_text('Advanced: custom application', exact=True).click()
@@ -51,7 +56,7 @@ def main():
                 expect(page.locator('#discord-application-id')).to_have_value('123456789012345678')
                 assert not errors, errors
                 browser.close()
-                print('PASS: Discord draft preservation, saves, modes and reload; mocked IPC only.')
+                print('PASS: Discord Settings-only ownership/order, draft preservation, saves, modes and reload; mocked IPC only.')
         finally:
             server.shutdown()
             server.server_close()

@@ -14,9 +14,23 @@ class DiscordActivityTests(unittest.TestCase):
 
     def test_team_ties_and_pending(self):
         result = build_activity('mogi', self.snapshot(), {'highlight_team_id': 't'})
-        self.assertIn('1 races scored', result['details'])
-        self.assertIn('Team #1', result['details'])
-        self.assertEqual(result['state'], 'Alice 15pts #1 | Bob 15pts #1')
+        self.assertEqual(result['details'], 'Mogi Teams · 1 race')
+        self.assertEqual(result['state'], 'Team #1 · 30 pts · Leading')
+        snapshot = self.snapshot()
+        snapshot['teams'].append({'id': 'tie', 'name': 'Tie', 'points': 30})
+        self.assertEqual(build_activity('mogi', snapshot, {'highlight_team_id': 't'})['state'],
+                         'Team #1 · 30 pts · Leading')
+
+    def test_team_gap_uses_net_points_and_competition_positions(self):
+        snapshot = self.snapshot()
+        snapshot['teams'] += [{'id': 'first', 'name': 'First', 'points': 60},
+                              {'id': 'tied', 'name': 'Tied', 'points': 30}]
+        result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
+        self.assertEqual(result['state'], 'Team #2 · 30 pts · -30 to #1')
+        snapshot['teams'][0]['points'] = -10
+        result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
+        self.assertEqual(result['state'], 'Team #3 · -10 pts · -40 to #2')
+        self.assertEqual(build_activity('mogi', snapshot, {})['state'], 'No team highlighted')
 
     def test_ffa_and_missing_identity(self):
         result = build_activity('ffa', self.snapshot(), {'highlight_player_id': 'a'}, lounge_rank='Gold')
@@ -29,7 +43,10 @@ class DiscordActivityTests(unittest.TestCase):
         for p in snapshot['players']:
             p['name'] = '日本語' * 100
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
-        self.assertIn('members', result['state'])
+        snapshot['teams'][0]['name'] = '日本語' * 100
+        result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
+        self.assertNotIn('members', result['state'])
+        self.assertIn('30 pts', result['state'])
         for text in result.values():
             self.assertLessEqual(len(text.encode('utf-8')), 128)
 

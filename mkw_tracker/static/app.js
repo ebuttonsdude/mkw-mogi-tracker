@@ -21,7 +21,7 @@ try { folderExpansion = JSON.parse(localStorage.getItem(folderExpansionKey) || '
 const tabSections = {
   standings: ['team-section', 'player-section', 'ww-section'], capture: ['capture-section', 'review-section'],
   videos: ['import-section', 'videos-section'], history: ['history-section', 'manual-section', 'editor-panel', 'timing-panel', 'evidence-panel', 'penalty-panel', 'ww-editor-panel'],
-  chapters: ['recordings-section'], overlays: ['overlay-section'], settings: ['settings-section', 'backup-section', 'experimental-section']
+  chapters: ['recordings-section'], overlays: ['overlay-section'], settings: ['settings-section', 'discord-section', 'backup-section', 'experimental-section']
 };
 let activeTab = 'standings';
 function selectTab(name, focus = false) {

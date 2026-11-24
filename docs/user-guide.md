@@ -203,12 +203,12 @@ Review the downloaded files and their course assignments before uploading. The t
 
 ## Discord Rich Presence
 
-Open **Settings → Discord Rich Presence** to opt in. This shares your mode, race statistics and highlighted names with people who can see your Discord activity. It is off by default; your choice and public Application ID are saved for next launch. Discord's **desktop app** must be running and allow activity sharing; the web client is not enough.
+Open **Settings → Discord Rich Presence**, directly below **Make it yours**, to opt in. This shares your mode, race statistics and highlighted names with people who can see your Discord activity. It is off by default; your choice and public Application ID are saved for next launch. Discord's **desktop app** must be running and allow activity sharing; the web client is not enough.
 
 The tracker includes its public application ID: **enable the checkbox and save**. No developer setup is needed. For an optional custom application, expand **Advanced: custom application**. To obtain your own ID, open the [Discord Developer Portal](https://discord.com/developers/applications), choose **New Application**, give it a display name such as **MKW Mogi Tracker**, then copy **Application ID** from **General Information**. Paste that ID into the tracker, enable the checkbox and save. Do not enter a bot token or client secret; neither is needed. The application name is the name Discord displays.
 
-- **Mogi Teams:** confirmed race count, highlighted team's position, and member points/positions.
+- **Mogi Teams:** confirmed race count, highlighted team’s net points and position, and points behind the next higher-scoring team. First place shows “Leading”; tied teams share a competition position.
 - **Mogi FFA:** confirmed race count, highlighted player's points/position and Lounge division if already cached with an unambiguous exact name. This does not initiate Lounge requests.
 - **Worldwides:** last-ten VR change, current/next race number and known current capture course, plus the last recorded race's gain/loss. Missing changes remain unknown.
 
-Mogi uses the **main overlay's highlight**, not a named source's override. Pending races never add points. Long names are shortened and large teams may show an explicit omitted-member count because Discord limits status text. Updates can take about 15 seconds. “Waiting for Discord desktop” means scoring remains available while the connection retries. Disable and save to clear the activity; clearing is best-effort if Discord has disconnected.
+Mogi uses the **main overlay's highlight**, not a named source's override. Pending races never add points. Long names are shortened because Discord limits status text. Discord controls the card size and provides two content rows; Teams shows a compact team summary rather than member-by-member scores. Updates can take about 15 seconds. “Waiting for Discord desktop” means scoring remains available while the connection retries. Disable and save to clear the activity; clearing is best-effort if Discord has disconnected.
