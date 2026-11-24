@@ -24,7 +24,7 @@ The optional setup downloads [Qwen's official Qwen3-VL-4B-Instruct GGUF weights]
 ## External Discord presence image
 
 At the owner's request, enabled Discord Rich Presence references a public
-[Conkdor artwork image from Super Mario 3D World](https://www.mariowiki.com/File:Conkdor_Artwork_-_Super_Mario_3D_World.png),
+[square Conkdor head/map icon from Mario Kart World](https://www.mariowiki.com/File:MK_World_map_Conkdor.png),
 hosted by Super Mario Wiki (`mario.wiki.gallery`). This is third-party Nintendo
 artwork, not artwork licensed under this project's AGPL. The repository and
 packages contain only its URL, not image bytes. Discord retrieves the remote

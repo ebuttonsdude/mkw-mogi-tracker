@@ -3,11 +3,7 @@
 
 # Remote reference only; no artwork or user-uploaded theme images are distributed.
 # Source and third-party hosting boundary are documented in ATTRIBUTION.md.
-CONKDOR_IMAGE_URL = (
-    'https://mario.wiki.gallery/images/thumb/1/13/'
-    'Conkdor_Artwork_-_Super_Mario_3D_World.png/'
-    '300px-Conkdor_Artwork_-_Super_Mario_3D_World.png'
-)
+CONKDOR_IMAGE_URL = 'https://mario.wiki.gallery/images/5/5d/MK_World_map_Conkdor.png'
 
 
 def _text(value, limit=128):
@@ -59,9 +55,9 @@ def build_activity(mode, snapshot, overlay_settings, *, current_course=None, lou
                 above = [t for t in teams if t['points'] > team['points']]
                 if above:
                     previous = min(above, key=lambda t: t['points'])
-                    gap = f"{team['points'] - previous['points']:+d} to #{_rank(previous, teams)}"
+                    gap = f"{previous['points'] - team['points']} pts to #{_rank(previous, teams)}"
                 else:
                     gap = 'Leading'
-                state = f"{_text(team['name'], 24)} #{_rank(team, teams)} · {team['points']} pts · {gap}"
+                state = f"Team Position #{_rank(team, teams)} · {team['points']} pts · {gap}"
     return {'details': _text(details), 'state': _text(state),
             'assets': {'large_image': CONKDOR_IMAGE_URL, 'large_text': 'Conkdor'}}

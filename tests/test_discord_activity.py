@@ -22,7 +22,8 @@ class DiscordActivityTests(unittest.TestCase):
         for mode in ('mogi', 'ffa', 'ww'):
             activity = build_activity(mode, snapshot, {})
             assets = activity['assets']
-            self.assertTrue(assets['large_image'].startswith('https://'))
+            self.assertEqual(assets['large_image'],
+                             'https://mario.wiki.gallery/images/5/5d/MK_World_map_Conkdor.png')
             self.assertEqual(assets['large_text'], 'Conkdor')
             self.assertNotIn('private', str(activity).lower())
             images.append(assets['large_image'])
@@ -34,21 +35,21 @@ class DiscordActivityTests(unittest.TestCase):
     def test_team_ties_and_pending(self):
         result = build_activity('mogi', self.snapshot(), {'highlight_team_id': 't'})
         self.assertEqual(result['details'], 'Mogi Teams · 1 race')
-        self.assertEqual(result['state'], 'Team #1 · 30 pts · Leading')
+        self.assertEqual(result['state'], 'Team Position #1 · 30 pts · Leading')
         snapshot = self.snapshot()
         snapshot['teams'].append({'id': 'tie', 'name': 'Tie', 'points': 30})
         self.assertEqual(build_activity('mogi', snapshot, {'highlight_team_id': 't'})['state'],
-                         'Team #1 · 30 pts · Leading')
+                         'Team Position #1 · 30 pts · Leading')
 
     def test_team_gap_uses_net_points_and_competition_positions(self):
         snapshot = self.snapshot()
         snapshot['teams'] += [{'id': 'first', 'name': 'First', 'points': 60},
                               {'id': 'tied', 'name': 'Tied', 'points': 30}]
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
-        self.assertEqual(result['state'], 'Team #2 · 30 pts · -30 to #1')
+        self.assertEqual(result['state'], 'Team Position #2 · 30 pts · 30 pts to #1')
         snapshot['teams'][0]['points'] = -10
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
-        self.assertEqual(result['state'], 'Team #3 · -10 pts · -40 to #2')
+        self.assertEqual(result['state'], 'Team Position #3 · -10 pts · 40 pts to #2')
         self.assertEqual(build_activity('mogi', snapshot, {})['state'], 'No team highlighted')
 
     def test_ffa_and_missing_identity(self):
@@ -62,8 +63,10 @@ class DiscordActivityTests(unittest.TestCase):
         for p in snapshot['players']:
             p['name'] = '日本語' * 100
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
-        snapshot['teams'][0]['name'] = '日本語' * 100
+        snapshot['teams'][0]['name'] = 'PrivateTeam日本語' * 100
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
+        self.assertNotIn('PrivateTeam', result['state'])
+        self.assertTrue(result['state'].startswith('Team Position #'))
         self.assertNotIn('members', result['state'])
         self.assertIn('30 pts', result['state'])
         for text in (result['details'], result['state']):
