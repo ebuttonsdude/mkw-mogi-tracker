@@ -212,3 +212,5 @@ The tracker includes its public application ID: **enable the checkbox and save**
 - **Worldwides:** last-ten VR change, current/next race number and known current capture course, plus the last recorded race's gain/loss. Missing changes remain unknown.
 
 Mogi uses the **main overlay's highlight**, not a named source's override. Pending races never add points. Long names are shortened because Discord limits status text. Discord controls the card size and provides two content rows; Teams shows a compact team summary rather than member-by-member scores. Updates can take about 15 seconds. “Waiting for Discord desktop” means scoring remains available while the connection retries. Disable and save to clear the activity; clearing is best-effort if Discord has disconnected.
+
+Discord uses a fixed public Conkdor picture, not your locally uploaded theme icon. Your custom pictures stay local. Discord retrieves the image from its public host; it may be missing or delayed if that host or Discord’s image cache is unavailable.

@@ -28,6 +28,7 @@ class DiscordIntegrationTests(unittest.TestCase):
                 self.app.update_settings(values)
         self.app.update_settings({'discord_enabled': True})
         self.rpc.configure.assert_called_with(True, '1574667683088171169')
+        self.assertEqual(self.rpc.publish.call_args.args[0]['assets']['large_text'], 'Conkdor')
 
     def test_persistence_disable_and_modes(self):
         self.app.update_settings({'discord_enabled': True, 'discord_application_id': '123456789012345678'})

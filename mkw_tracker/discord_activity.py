@@ -1,6 +1,15 @@
 """Pure, bounded Discord status text from the active scoring snapshot."""
 
 
+# Remote reference only; no artwork or user-uploaded theme images are distributed.
+# Source and third-party hosting boundary are documented in ATTRIBUTION.md.
+CONKDOR_IMAGE_URL = (
+    'https://mario.wiki.gallery/images/thumb/1/13/'
+    'Conkdor_Artwork_-_Super_Mario_3D_World.png/'
+    '300px-Conkdor_Artwork_-_Super_Mario_3D_World.png'
+)
+
+
 def _text(value, limit=128):
     text = ' '.join(str(value).split())
     encoded = text.encode('utf-8', errors='replace')
@@ -54,4 +63,5 @@ def build_activity(mode, snapshot, overlay_settings, *, current_course=None, lou
                 else:
                     gap = 'Leading'
                 state = f"{_text(team['name'], 24)} #{_rank(team, teams)} · {team['points']} pts · {gap}"
-    return {'details': _text(details), 'state': _text(state)}
+    return {'details': _text(details), 'state': _text(state),
+            'assets': {'large_image': CONKDOR_IMAGE_URL, 'large_text': 'Conkdor'}}

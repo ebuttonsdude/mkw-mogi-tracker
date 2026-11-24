@@ -20,3 +20,14 @@ notices, distribution boundaries and remaining review requirements.
 ## Optional GGUF reader
 
 The optional setup downloads [Qwen's official Qwen3-VL-4B-Instruct GGUF weights](https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct-GGUF) and F16 vision projector (Apache-2.0), plus [llama.cpp](https://github.com/ggml-org/llama.cpp) (MIT). Exact revisions, release archives, and SHA-256 hashes are pinned in the reader profile/setup tool. Setup retains the upstream license texts alongside those local downloads. Models, executables, and their bundled third-party libraries are runtime data, not included in this repository or its distribution archives. Their licenses do not assign a license to the tracker itself.
+
+## External Discord presence image
+
+At the owner's request, enabled Discord Rich Presence references a public
+[Conkdor artwork image from Super Mario 3D World](https://www.mariowiki.com/File:Conkdor_Artwork_-_Super_Mario_3D_World.png),
+hosted by Super Mario Wiki (`mario.wiki.gallery`). This is third-party Nintendo
+artwork, not artwork licensed under this project's AGPL. The repository and
+packages contain only its URL, not image bytes. Discord retrieves the remote
+image; the tracker does not upload local theme images. This reference is not a
+claim of permission to redistribute the artwork. Availability and Discord's
+image proxy/cache behavior remain outside the tracker's control.

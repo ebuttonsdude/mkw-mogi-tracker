@@ -12,6 +12,25 @@ class DiscordActivityTests(unittest.TestCase):
                         {'id': 'b', 'name': 'Bob', 'points': 15, 'team_id': 't'}],
             'teams': [{'id': 't', 'name': 'Team', 'points': 30}]}
 
+    def test_public_conkdor_image_is_fixed_across_modes_and_local_themes(self):
+        snapshot = self.snapshot()
+        snapshot['ww'] = {'last_10_change': None}
+        snapshot['theme'] = {'icon_url': '/api/themes/private/icon.png', 'name': 'Private theme'}
+        for race in snapshot['races']:
+            race['ww_result'] = None
+        images = []
+        for mode in ('mogi', 'ffa', 'ww'):
+            activity = build_activity(mode, snapshot, {})
+            assets = activity['assets']
+            self.assertTrue(assets['large_image'].startswith('https://'))
+            self.assertEqual(assets['large_text'], 'Conkdor')
+            self.assertNotIn('private', str(activity).lower())
+            images.append(assets['large_image'])
+        self.assertEqual(len(set(images)), 1)
+        # Callers cannot mutate the next payload's asset dictionary.
+        activity['assets']['large_image'] = 'changed'
+        self.assertEqual(build_activity('mogi', snapshot, {})['assets']['large_image'], images[0])
+
     def test_team_ties_and_pending(self):
         result = build_activity('mogi', self.snapshot(), {'highlight_team_id': 't'})
         self.assertEqual(result['details'], 'Mogi Teams · 1 race')
@@ -47,7 +66,7 @@ class DiscordActivityTests(unittest.TestCase):
         result = build_activity('mogi', snapshot, {'highlight_team_id': 't'})
         self.assertNotIn('members', result['state'])
         self.assertIn('30 pts', result['state'])
-        for text in result.values():
+        for text in (result['details'], result['state']):
             self.assertLessEqual(len(text.encode('utf-8')), 128)
 
     def test_ww_saved_order_unknown_and_foreign_session(self):
