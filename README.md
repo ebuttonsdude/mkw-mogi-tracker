@@ -11,7 +11,7 @@ MKW-Mogi-Tracker is a **Mario Kart World scoreboard that runs on your computer**
 - **Mogi Teams:** track twelve-player rooms and team points.
 - **Mogi FFA:** track twelve players without setting up teams.
 - **Worldwides:** follow your own finishing positions and VR.
-- **Share:** show standings in OBS, save a results image, or export video chapter times.
+- **Share:** show standings in OBS, save a results image, or export video chapter times. Optionally share mode-specific Discord Rich Presence from Settings (off by default).
 
 You use the app in your browser. Your scores and recordings stay local. An optional external vision reader sends only name crops to your configured server after consent where required. A GPU is optional.
 

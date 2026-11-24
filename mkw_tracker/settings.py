@@ -7,7 +7,7 @@ from .themes import resolve_theme
 from .report_fonts import valid_font_id
 
 DEFAULT_SETTINGS = {
-    'yolo_mode': False,
+    'yolo_mode': False, 'discord_enabled': False, 'discord_application_id': '1574667683088171169',
     'standings_format': 'txt', 'theme': 'mario', 'report_font': '', 'mogi_png_graph': 'cumulative',
     'overlay': {'layout': 'teams', 'width': 560, 'height': 600, 'font_size': 22,
                 'opacity': .85, 'show_header': True, 'show_players': True,
@@ -24,8 +24,20 @@ DEFAULT_SETTINGS = {
 def merge_settings(current, values, *, theme_resolver=resolve_theme):
     if not isinstance(values, dict) or not values or not set(values) <= set(DEFAULT_SETTINGS):
         raise ValueError('Provide valid display settings: standings_format, theme, report_font, '
-                         'mogi_png_graph, overlay or yolo_mode.')
+                         'mogi_png_graph, overlay, discord_enabled, discord_application_id or yolo_mode.')
     merged = deepcopy(current)
+    if 'discord_enabled' in values:
+        if type(values['discord_enabled']) is not bool:
+            raise ValueError('discord_enabled must be a boolean.')
+        merged['discord_enabled'] = values['discord_enabled']
+    if 'discord_application_id' in values:
+        value = values['discord_application_id']
+        if not isinstance(value, str) or (value and (not value.isascii() or not value.isdigit()
+                                                     or not 17 <= len(value) <= 20)):
+            raise ValueError('Discord Application ID must be 17–20 ASCII digits, or empty.')
+        merged['discord_application_id'] = value
+    if merged.get('discord_enabled') and not merged.get('discord_application_id'):
+        raise ValueError('Enter a Discord Application ID before enabling Rich Presence.')
     if 'yolo_mode' in values:
         if type(values['yolo_mode']) is not bool:
             raise ValueError('yolo_mode must be a boolean.')

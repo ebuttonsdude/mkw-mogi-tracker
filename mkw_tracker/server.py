@@ -17,6 +17,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 from uuid import uuid4
 
+from .discord_rpc import DiscordPresence
+from .discord_activity import build_activity
 from .diagnostics import log_event
 from .store import TrackerStore
 from .capture import CaptureCoordinator
@@ -105,6 +107,7 @@ class Application:
         self.obs_text_error = None
         self._output_retry = None
         self._closing = self._closed = False
+        self.discord = DiscordPresence()
         self.store.on_commit = lambda: self._store_committed(self._contexts['mogi'][0])
         try:
             if self.tracker_mode_path.exists() and mode != 'demo':
@@ -236,6 +239,7 @@ class Application:
         with self.lock:
             try:
                 snapshot = snapshot if snapshot is not None else self._session_snapshot()
+                self._sync_discord(snapshot)
                 if self.tracker_mode == 'ww':
                     ww = snapshot['ww']
                     lines = [ww['player_name']] + [
@@ -316,7 +320,29 @@ class Application:
                     # The selected output is valid; an old generated file is
                     # never advertised as the current OBS path.
                     pass
+            self._sync_discord()
             return deepcopy(self.settings)
+
+    def _sync_discord(self, snapshot=None):
+        self.discord.configure(self.settings['discord_enabled'], self.settings['discord_application_id'])
+        if not self.settings['discord_enabled']:
+            return
+        snapshot = snapshot if snapshot is not None else self._session_snapshot()
+        capture = getattr(self.capture, 'state', {})
+        course = capture.get('course') if capture.get('session_id') == snapshot['session']['id'] else None
+        rank = None
+        if self.tracker_mode == 'ffa':
+            player = next((p for p in snapshot['players']
+                           if p['id'] == self.settings['overlay']['highlight_player_id']), None)
+            # Read only already-fetched, unambiguous exact-name data. Never schedule a lookup.
+            if player:
+                with self.lounge.lock:
+                    matches = [entry['data'] for entry in self.lounge.cache.values()
+                               if entry.get('data') and entry['data'].get('name') == player['name']]
+                if len(matches) == 1:
+                    rank = matches[0].get('division')
+        self.discord.publish(build_activity(self.tracker_mode, snapshot, self.settings['overlay'],
+                                            current_course=course, lounge_rank=rank))
 
     def _sync_overlay_visibility(self):
         """Consume live phase edges once; manual controls win between edges."""
@@ -507,12 +533,16 @@ class Application:
                       themes=self.theme_library.themes(), display_standings=self._base_overlay_snapshot(result, self.settings),
                       obs_text_path=str(self.obs_text_path),
                       obs_text_error=self.obs_text_error)
+        with self.lock:
+            self._sync_discord()
+        result['discord_status'] = self.discord.status()
         result['mode_switch_warning'] = self._mode_switch_warning(result['imports'])
         return result
 
     def close(self):
         if self._closed:
             return
+        self.discord.close()
         self.lounge.close()
         self.external_test_cancel.set()
         self._contexts[self.tracker_mode] = (self.store, self.capture, self.imports)

@@ -109,6 +109,11 @@ function renderFontSettings() {
 let settingsSignature = '';
 function renderSettings() {
   OverlaySources.render(state);
+  $('discord-status').textContent = state.discord_status || 'Disabled';
+  if (!$('discord-settings').dataset.dirty) {
+    $('discord-enabled').checked = !!state.settings?.discord_enabled;
+    $('discord-application-id').value = state.settings?.discord_application_id || '';
+  }
   renderFontSettings();
   $('mogi-png-graph').value = state.settings?.mogi_png_graph || 'cumulative';
   $('yolo-mode').checked = !!state.settings?.yolo_mode;
@@ -1255,6 +1260,16 @@ submit('add-penalty', async (form, data) => {
 $('report-font').addEventListener('change', previewFont);
 $('font-preview-text').addEventListener('input', previewFont);
 $('font-reload').addEventListener('click', () => reloadFonts().catch(error => message(error.message, true)));
+$('discord-settings').addEventListener('input', () => { $('discord-settings').dataset.dirty = 'true'; });
+submit('discord-settings', async (form) => {
+  const enabled = $('discord-enabled').checked;
+  const applicationId = $('discord-application-id').value.trim();
+  await api('/api/settings', 'PATCH', {discord_enabled: enabled, discord_application_id: applicationId});
+  if (enabled === $('discord-enabled').checked && applicationId === $('discord-application-id').value.trim()) {
+    delete form.dataset.dirty;
+  }
+  await refresh(); message('Discord settings saved.');
+});
 let yoloDraft = null;
 $('yolo-mode').addEventListener('change', async () => {
   const enabled = $('yolo-mode').checked;
