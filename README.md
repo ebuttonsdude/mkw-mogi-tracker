@@ -172,6 +172,8 @@ For Mogi Teams and FFA, **Settings → Mogi PNG graph** lets you choose **Cumula
 
 **Experimental YOLO mode:** Settings → Experimental can automatically confirm future Mogi results, including incomplete detections. It is off by default and requires accepting a warning. Missing players become distinct `not-detected-fixme` entries. [Read the risks and controls](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#experimental-yolo-mode) before enabling it.
 
+**Course names:** the 48-name catalog includes Airship Fortress 2, Desert Hills 2, Salty Salty Speedway 2, DK Pass 2, Koopa Troopa Beach 2, Shy Guy Bazaar 2, Mario Bros. Circuit 2, and Wario Stadium 2, alongside their original versions.
+
 **Course pictures:** upload your own local thumbnails under **Settings → Course pictures**, or activate them with the migrator, including the old tracker’s coded track filenames. [Upload guidance and a suggested download prompt](https://ebuttonsdude.github.io/mkw-mogi-tracker/user-guide/#course-pictures). No course artwork is bundled.
 
 **Choose your font:** expand **Settings → Overlay & PNG font**, preview a local font, save it for both outputs, or reset to the default. You can add your own TTF/OTF files to the data folder’s `fonts/` directory.

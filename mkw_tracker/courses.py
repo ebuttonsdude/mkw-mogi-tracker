@@ -15,6 +15,8 @@ COURSES = (
     "SNES Mario Circuit 2", "SNES Mario Circuit 3", "SNES Ghost Valley 1",
     "SNES Ghost Valley 2", "SNES Ghost Valley 3", "SNES Choco Island 1",
     "SNES Choco Island 2", "SNES Vanilla Lake 1", "SNES Koopa Beach 1",
+    "Airship Fortress 2", "Desert Hills 2", "Salty Salty Speedway 2", "DK Pass 2",
+    "Koopa Troopa Beach 2", "Shy Guy Bazaar 2", "Mario Bros. Circuit 2", "Wario Stadium 2",
 )
 
 

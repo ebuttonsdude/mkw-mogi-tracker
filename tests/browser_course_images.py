@@ -7,6 +7,7 @@ import threading
 from mkw_tracker.server import Application, make_server
 from mkw_tracker.migrate import migrate
 from tests.test_course_migration import LEGACY_COURSE_FILES
+from tests.test_courses import NUMBERED_VARIANTS
 
 
 def main():
@@ -45,6 +46,8 @@ def main():
                 page.locator('#tab-settings').click()
                 expect(page.locator('#course-images-details')).not_to_have_attribute('open', '')
                 page.locator('#course-images-details summary').click()
+                for course in NUMBERED_VARIANTS:
+                    expect(page.locator(f'#course-image-courses option[value="{course}"]')).to_have_count(1)
                 expect(page.locator('#course-image-library img')).to_have_count(40)
                 page.locator('#course-image-reload').click()
                 expect(page.locator('#course-image-library img')).to_have_count(40)

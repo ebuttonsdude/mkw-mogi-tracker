@@ -87,17 +87,17 @@ class CourseMigrationTests(unittest.TestCase):
             (self.static / f'MKW_Track_{course}_icon.png').write_bytes(png())
         before = {p: p.read_bytes() for p in self.source.rglob('*') if p.is_file()}
         inventory = inspect_source(self.source)['categories']['pictures']
-        self.assertEqual(inventory['count'], 40)
+        self.assertEqual(inventory['count'], len(COURSES))
         result = self.run_migration()
-        self.assertEqual(result['course_images'], 40)
-        self.assertEqual(len(CourseImageLibrary(self.target).records), 40)
+        self.assertEqual(result['course_images'], len(COURSES))
+        self.assertEqual(len(CourseImageLibrary(self.target).records), len(COURSES))
         self.assertFalse(list(self.target.rglob('tracker.sqlite3')))
         self.assertEqual(self.run_migration(conflict='skip')['course_images'], 0)
         self.assertEqual(before, {p: p.read_bytes() for p in self.source.rglob('*') if p.is_file()})
 
     def test_legacy_filename_associations_are_exact_and_complete(self):
         self.assertEqual(len(LEGACY_COURSE_FILES), 40)
-        self.assertEqual(set(LEGACY_COURSE_FILES.values()), set(COURSES))
+        self.assertTrue(set(LEGACY_COURSE_FILES.values()) <= set(COURSES))
         for filename, course in LEGACY_COURSE_FILES.items():
             with self.subTest(filename=filename):
                 self.assertEqual(course_from_filename(filename), course)
@@ -123,8 +123,8 @@ class CourseMigrationTests(unittest.TestCase):
         self.assertEqual(result['sessions'], [])
         self.assertEqual(result['warnings'], [])
         library = CourseImageLibrary(self.target)
-        self.assertEqual({record['course'] for record in library.public()}, set(COURSES))
-        for course in COURSES:
+        self.assertEqual({record['course'] for record in library.public()}, set(LEGACY_COURSE_FILES.values()))
+        for course in LEGACY_COURSE_FILES.values():
             self.assertTrue(library.icon_url(course))
         self.assertEqual(self.run_migration(conflict='skip')['course_images'], 0)
         self.assertEqual(before, {p: p.read_bytes() for p in self.source.rglob('*') if p.is_file()})
